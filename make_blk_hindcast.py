@@ -9,18 +9,20 @@
 This script is responsible of creating the hindcast surface forcing files.
 The algorithm consist of the following steps:
     (0)  Check if croco_blk files already exists. If not, then create the file,
-         if yes but is corrupted somehow, create it again and overwrite.
+         if yes but is corrupted somehow*, create it again and overwrite.
     (i)  Transform raw ERA5 NRT hourly data to a crocotools compatible format.
-         Store this result in scratch/temporary directory/files.
+         Store this result in scratch directory.
     (ii) Run make_hindcast_ERA5.m matlab routine (croco_tools/Forecast_tools)
          and create the croco_blk.nc atmospheric forcing file and the 
          croco_frc.nc only with the tidal forcing variables. 
     (...) Add itolap to bulk files with a few hours
     (...) Clean scratch directory
 
-In addition to the needed python packages, this script only can run if an
-matlab and nco (e.g ncks) executables exists on system path.
+In addition to the needed python packages, this script only works if a
+matlab and nco (e.g ncks, ncatted, ncpdq, etc) executables exists on system path.
 
+
+* No routine to check data corruption yet...
 '''
 
  
@@ -61,12 +63,12 @@ os.chdir(maindir)
 # --------------------------------- FUNCTIONS -------------------------------- #
 def ERA5_coefficients():
     """
-    This function returns a dictionary 3 lists, the ER5 variable
+    This function returns a dictionary with 3 lists, the ER5 variable
     names, the corresponding unit conversion coefficients, and the
     final units as strings.
     
     Returns:
-        dict: Dictionary with 'variables', 'conv_cff' and 'units'
+        dict: Dictionary with 'variables', 'conv_cff' and 'units' keys
     """
     with open('./croco_tools/Aforc_ERA5/ERA5_variables.json', 'r') as jf:
         era5 = json.load(jf)
@@ -113,7 +115,7 @@ def ERA5_convert(fname, date, outdir=scratchdir, Yorig=Yorig):
         Defaults to Yorig=1950 see above.
     """
     fdate     = date.strftime('%F')
-    coeffs = ERA5_coefficients()
+    coeffs    = ERA5_coefficients()
     for k in range(len(coeffs['variables'])):
         # Variable's name, long-name and level-type
         vname = coeffs['variables'][k]
