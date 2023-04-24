@@ -32,6 +32,7 @@
 %  Updated    9-Sep-2006 by Pierrick Penven
 %  Updated    20-Aug-2008 by Matthieu Caillaud & P. Marchesiello
 %  Updated    12-Feb-2016 by P. Marchesiello
+%  Edited     24-04-2023 by Lucas Glasner
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -43,8 +44,8 @@ crocotools_param
 makeplot = 0;
 it=2;
 %
-frc_prefix=[frc_prefix,'_GFS_'];
-blk_prefix=[blk_prefix,'_GFS_'];
+frc_prefix=[frc_prefix,'_'];
+blk_prefix=[blk_prefix,'_'];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % end of user input  parameters
@@ -96,8 +97,16 @@ if Download_data==1
 %
 % Download data with DODS (the download matlab routine depends on the OGCM)
 % 
-  disp('Download data...')
-  download_GFS(today,lonmin,lonmax,latmin,latmax,FRCST_dir,Yorig,it)
+  if exist(gfs_name,'file')==2
+    disp(' ')
+    disp([gfs_name,' already exists!!'])
+    disp(' ')
+  else
+    disp(' ')
+    disp('Download data...')
+    download_GFS(today,lonmin,lonmax,latmin,latmax,FRCST_dir,Yorig,it)
+    disp(' ')
+  end
 %
 end
 %
@@ -112,27 +121,29 @@ tlen=length(time);
 %
 % bulk and forcing files
 %
+frcname=[frc_prefix,datestr(today,'yyyymmdd'),nc_suffix];
 blkname=[blk_prefix,datestr(today,'yyyymmdd'),nc_suffix];
 disp(['Create a new bulk file: ' blkname])
 create_bulk(blkname,grdname,CROCO_title,time,0);
 nc_blk=netcdf(blkname,'write');
-% frcname=[frc_prefix,num2str(rundate),nc_suffix];
-% disp(['Create a new forcing file: ' frcname])
-% create_forcing(frcname,grdname,CROCO_title,...
-%                        time,0,0,...
-%                        0,0,0,...
-%   	               0,0,0,0,0,0)
-% nc_frc=netcdf(frcname,'write');
-% for l=1:tlen
-% nc_blk{'tair'}(l,:,:)=0;
-% nc_blk{'rhum'}(l,:,:)=0;
-% nc_blk{'prate'}(l,:,:)=0;
-% nc_blk{'radsw'}(l,:,:)=0;
-% nc_blk{'radlw'}(l,:,:)=0;
-% nc_blk{'wspd'}(l,:,:)=0;
-% nc_frc{'sustr'}(l,:,:)=0;
-% nc_frc{'svstr'}(l,:,:)=0;
-% end
+
+
+%
+% Add the tides
+%
+
+if add_tides_fcst==1
+  disp(' ')
+  disp(['Create a new only tide forcing file: ' frcname])
+  create_forcing_tideonly(frcname,grdname,CROCO_title)
+  disp(['Add tidal data ... '])
+  [Y,M,d,h,mi,s] = datevec(datestr(rundate,'yyyy-mm-dd'));
+  add_tidal_data(tidename,grdname,frcname,Ntides,tidalrank, ...
+              Yorig,Y,M,coastfileplot,sal_tides,salname)
+end
+disp('Done')
+disp(' ')
+disp('Creating croco_blk file from GFS data...')
 %
 % Loop on time
 %

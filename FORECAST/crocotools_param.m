@@ -48,55 +48,55 @@ isoctave=exist('octave_config_info');
 %
 %  CROCO title names and directories
 %
-CROCO_title  = 'Benguela Model';
-CROCO_config = 'Benguela_LR';
+CROCO_title  = 'CROCO CEAZA FORECAST';
+CROCO_config = 'crococeazaf';
 %
 % Grid dimensions:
 %
-lonmin =   8;   % Minimum longitude [degree east]
-lonmax =  22;   % Maximum longitude [degree east]
-latmin = -38;   % Minimum latitude  [degree north]
-latmax = -26;   % Maximum latitude  [degree north]
+lonmin =  285.0;   % Minimum longitude [degree east]
+lonmax =  289.2;   % Maximum longitude [degree east]
+latmin =  -33.5;   % Minimum latitude  [degree north]
+latmax =  -27.5;   % Maximum latitude  [degree north]
 %
 % Grid resolution [degree]
 %
-dl = 1/3;
+dl = 1/36;
 %
 % Number of vertical Levels (! should be the same in param.h !)
 %
-N = 32;
+N = 50;
 %
 %  Vertical grid parameters (! should be the same in croco.in !)
 %
 theta_s    =  7.;
 theta_b    =  2.;
-hc         = 200.;
+hc         = 300.;
 vtransform =  2.; % s-coordinate type (1: old- ; 2: new- coordinates)
                   % ! take care to define NEW_S_COORD cpp-key in cppdefs.h 
 %
 % Topography: choice of filter
 %
-topo_smooth =  1; % 1: old ; 2: new filter (better but slower)
+topo_smooth =  2; % 1: old ; 2: new filter (better but slower)
 %
 % Minimum depth at the shore [m] (depends on the resolution,
 % rule of thumb: dl=1, hmin=300, dl=1/4, hmin=150, ...)
 % This affect the filtering since it works on grad(h)/h.
 %
-hmin = 75;
+hmin = 15;
 %
 % Maximum depth at the shore [m] (to prevent the generation
 % of too big walls along the coast)
 %
-hmax_coast = 500;
+hmax_coast = 25;
 %
 % Maximum depth [m] (cut the topography to prevent
 % extrapolations below WOA data)
 %
-hmax = 5000;
+hmax = 7500;
 %
 % Slope parameter (r=grad(h)/h) maximum value for topography smoothing
 %
-rtarget = 0.25;
+rtarget = 0.2;
 %
 % Number of pass of a selective filter to reduce the isolated
 % seamounts on the deep ocean.
@@ -116,8 +116,8 @@ n_filter_final=2;
 %  XXX_l.mat    Low resolution data
 %  XXX_c.mat    Crude resolution data
 %
-coastfileplot = 'coastline_l.mat';
-coastfilemask = 'coastline_l_mask.mat';
+coastfileplot = 'coastline_f.mat';
+coastfilemask = 'coastline_f_mask.mat';
 %
 % Objective analysis decorrelation scale [m]
 % (if Roa=0: nearest extrapolation method; crude but much cheaper)
@@ -142,7 +142,7 @@ CROCOTOOLS_dir = '/ceaza/lucas/CROCO-CEAZAMAR/croco_tools/';
 %
 %  Run directory
 %
-RUN_dir='.././FORECAST/';
+RUN_dir='/ceaza/lucas/CROCO-CEAZAMAR/FORECAST/';
 %
 %  CROCO input netcdf files directory
 %
@@ -150,7 +150,7 @@ CROCO_files_dir=[RUN_dir,'CROCO_FILES/'];
 %
 %  Global data directory (etopo, coads, datasets download from ftp, etc..)
 %
-DATADIR='../../croco_tools/'; 
+DATADIR='/ceaza/lucas/CROCO-CEAZAMAR/DATA/'; 
 %
 %  Forcing data directory (ncep, quikscat, datasets download with opendap, etc..)
 %
@@ -164,25 +164,25 @@ end
 %
 % CROCO file names (grid, forcing, bulk, climatology, initial)
 %
-grdname  = [CROCO_files_dir,'croco_grd.nc'];
-frcname  = [CROCO_files_dir,'croco_frc.nc'];
-blkname  = [CROCO_files_dir,'croco_blk.nc'];
-clmname  = [CROCO_files_dir,'croco_clm.nc'];
+grdname  = [CROCO_files_dir,'crococeazaf_grd.nc'];
+frcname  = [CROCO_files_dir,'crococeazaf_frc.nc'];
+blkname  = [CROCO_files_dir,'crococeazaf_blk.nc'];
+clmname  = [CROCO_files_dir,'crococeazaf_clm.nc'];
 
-bryname  = [CROCO_files_dir,'croco_bry.nc'];
-ininame  = [CROCO_files_dir,'croco_ini.nc'];
-bioname  = [CROCO_files_dir,'croco_frcbio.nc']; % Iron Dust forcing for PISCES
-rivname =  [CROCO_files_dir,'croco_runoff.nc'];
+bryname  = [CROCO_files_dir,'crococeazaf_bry.nc'];
+ininame  = [CROCO_files_dir,'crococeazaf_ini.nc'];
+bioname  = [CROCO_files_dir,'crococeazaf_frcbio.nc']; % Iron Dust forcing for PISCES
+rivname =  [CROCO_files_dir,'crococeazaf_runoff.nc'];
 %
 % intermediate z-level data files (not used in simulations)
 %
-oaname   = [CROCO_files_dir,'croco_oa.nc'];    % for climatology data processing
-Zbryname = [CROCO_files_dir,'croco_bry_Z.nc']; % for boundary data processing
+oaname   = [CROCO_files_dir,'crococeazaf_oa.nc'];    % for climatology data processing
+Zbryname = [CROCO_files_dir,'crococeazaf_bry_Z.nc']; % for boundary data processing
 %
 % Generic forcing file root names for interannual simulations (NCEP/GFS)
 %
-frc_prefix=[CROCO_files_dir,'croco_frc'];      % forcing file name 
-blk_prefix=[CROCO_files_dir,'croco_blk'];      % bulk file name
+frc_prefix=[CROCO_files_dir,'crococeazaf_frc'];      % forcing file name 
+blk_prefix=[CROCO_files_dir,'crococeazaf_blk'];      % bulk file name
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -227,7 +227,7 @@ pathfinder_sst_name=[DATADIR,...
 %
 %  Open boundaries switches (! should be consistent with cppdefs.h !)
 %
-obc = [1 1 1 1]; % open boundaries (1=open , [S E N W])
+obc = [1 0 1 1]; % open boundaries (1=open , [S E N W])
 %
 %  Level of reference for geostrophy calculation
 %
@@ -238,7 +238,7 @@ zref = -1000;
 %   make_OGCM.m and make_OGCM_frcst.m)
 %
 makeini    = 1;   % initial data
-makeclim   = 1;   % climatological data (for boundaries and nudging layers)
+makeclim   = 0;   % climatological data (for boundaries and nudging layers)
 makebry    = 1;   % lateral boundary data
 makenpzd   = 0;   % initial and boundary data for NChlPZD and N2ChlPZD2 models
 makebioebus= 0;   % initial and boundary data for BioEBUS model
@@ -325,7 +325,7 @@ Z0   =  1;       % Mean depth of tide gauge
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-Yorig         = 2000;          % reference time for vector time
+Yorig         = 1950;          % reference time for vector time
                                % in croco initial and forcing files
 %
 Ymin          = 2005;          % first forcing year
@@ -380,8 +380,8 @@ add_tides    = 0;       % 1: add tides
 %
 % Overlap parameters 
 %
-itolap_qscat = 2;       % 2 records for daily  QSCAT
-itolap_ncep  = 8;       % 8 records for 4-daily NCEP
+itolap_qscat = 0;       % 2 records for daily  QSCAT
+itolap_ncep  = 0;       % 8 records for 4-daily NCEP
 %
 %--------------------------------------------------
 % Options for make_QSCAT_daily and make_QSCAT_clim   
@@ -401,29 +401,31 @@ Reformat_ECMWF = 1;
 ECMWF_dir= [FORC_DATA_DIR,'ECMWF_',CROCO_config,'/'];  % ERA-I data dir. [croco format]
 My_ECMWF_dir=[FORC_DATA_DIR,'ERAI/'];                  % ERA-I native data downloaded 
                                                        % with python script
-itolap_ecmwf = 3;                                      % 3 records for daily  ECMWF
+itolap_ecmwf = 0;                                      % 3 records for daily  ECMWF
 %
 %--------------------------------------------------
-%  Options for make_ERA5 
+%  Options for make_ERA5 and make_FORECAST_ERA5
 %--------------------------------------------------
 %
-ERA5_dir= [FORC_DATA_DIR,'ERA5_native_',CROCO_config,'/'];   % ERA-I data dir. [croco format]
-My_ERA5_dir=[FORC_DATA_DIR,'ERA5/'];                  % ERA-I native data downloaded 
-                                                      % with python script
-itolap_era5 = 1;                                      % 2 records = 2 hours
+ERA5_dir    = [RUN_dir,'/SCRATCH/'];          % ERA5 data dir. [croco format]
+My_ERA5_dir = [FORC_DATA_DIR,'/ERA5/'];       % ERA5 native data downloaded with python script
+itolap_era5 = 0;                              % 2 records = 2 hours
+ERA5_delay  = 6;                              % Delay days of ERA5 NRT product
+ERA5_offset = 10;                             % Days of ERA5 NRT to compute from the latest
+
 %
 %
 %--------------------------------------------
 % Options for make_OGCM or make_OGCM_mercator
 %--------------------------------------------
 %
-OGCM        = 'SODA';        % Select OGCM: SODA, ECCO, mercator
+OGCM        = 'mercator';        % Select OGCM: SODA, ECCO, mercator
 %
 OGCM_dir    = [FORC_DATA_DIR,OGCM,'_',CROCO_config,'/'];  % OGCM data dir. [croco format]
 %
-bry_prefix  = [CROCO_files_dir,'croco_bry_',OGCM,'_'];    % generic boundary file name
-clm_prefix  = [CROCO_files_dir,'croco_clm_',OGCM,'_'];    % generic climatology file name
-ini_prefix  = [CROCO_files_dir,'croco_ini_',OGCM,'_'];    % generic initial file name
+bry_prefix  = [CROCO_files_dir,'crococeazaf_bry_',OGCM,'_'];    % generic boundary file name
+clm_prefix  = [CROCO_files_dir,'crococeazaf_clm_',OGCM,'_'];    % generic climatology file name
+ini_prefix  = [CROCO_files_dir,'crococeazaf_ini_',OGCM,'_'];    % generic initial file name
 OGCM_prefix = [OGCM,'_'];                                 % generic OGCM file name 
 
 if strcmp(OGCM,'mercator')
@@ -441,14 +443,14 @@ rmdepth     = 2;
 %
 % Overlap parameters : nb of records around each monthly sequence
 %
-itolap_a    = 1;   % before
-itolap_p    = 1;   % after
+itolap_0    = 1;   % before
+itolap_0    = 1;   % after
                    %
 %--------------------------
 % Options for make_bry_WKB 
 %--------------------------
 %
-wkb_prefix=[CROCO_files_dir,'croco_wkb'];
+wkb_prefix=[CROCO_files_dir,'crococeazaf_wkb'];
 wkb_obc= [1 1 1 1];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -464,21 +466,21 @@ wkb_obc= [1 1 1 1];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-FRCST_dir = [FORC_DATA_DIR,'Forecast/'];  % path to local OGCM data directory
+FRCST_dir = [FORC_DATA_DIR];  % path to local OGCM data directory
 %
-% Number of hindcast/forecast days
+% Number of FORECAST/forecast days
 %
 if strcmp(OGCM,'ECCO')
   hdays=1;
-  fdays=6;
+  fdays=0;
 elseif strcmp(OGCM,'mercator')
-  hdays=1;
-  fdays=3;
+  hdays=6;
+  fdays=10;
 end
 %
 % Local time= UTC + timezone
 %
-timezone = +2;
+timezone = 0;
 %
 % Add tides
 %

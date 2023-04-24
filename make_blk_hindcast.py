@@ -43,7 +43,7 @@ DATADIR         = '/ceaza/lucas/CROCO-CEAZAMAR/DATA/'
 CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 Yorig           = 1950              
 ERA5_delay      = 6         
-ERA5_offset     = 10          
+ERA5_offset     = 3          
 itolap_era5     = 6   
 
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
@@ -277,7 +277,7 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         fdata = fdata.isel(bulk_time=slice(0,itolap))
         data  = xr.concat([data,fdata],'bulk_time')
     else:
-        print('\t','Previous day file not found: filling forwards with the last record')
+        print('\t','Following day file not found: filling forwards with the last record')
         ntime = np.concatenate([data.bulk_time.values, ftimes])
         data  = data.reindex({'bulk_time':ntime}).ffill('bulk_time')
     
@@ -314,13 +314,19 @@ if __name__=='__main__':
     make_hindcast_ERA5()
     print('\nCleaning scratch directory...','                                 ')
     os.system('rm -rf '+scratchdir+'/*.nc')
-    # print('-------------------------------------------------------------------')
-    # print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
-    # print(' Adding overlap days to croco_blk files, please wait...            ')
-    # print(' Dates =',dates,'                                                  ')
-    # print('-------------------------------------------------------------------')
-    # for date in dates:
-    #     add_itolap_bulks(date)
+    print('-------------------------------------------------------------------')
+    print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
+    print(' Adding overlap days to croco_blk files, please wait...            ')
+    print(' Dates =',dates,'                                                  ')
+    print('-------------------------------------------------------------------')
+    for date in dates:
+        add_itolap_bulks(date)
+    print('Overwriting files...','                                            ')
+    for date in dates:
+        blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
+        os.remove(blkname)
+        os.rename(blkname+'.2',blkname)
+            
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
