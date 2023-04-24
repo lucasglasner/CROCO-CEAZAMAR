@@ -288,9 +288,10 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
     return 
     
     
-
-# ------------------------------- RUN ROUTINES ------------------------------- #
-if __name__=='__main__':
+def main_blk_hindcast():
+    """
+    This function just run all the previous routines and creates the file.
+    """
     starttime = datetime.datetime.utcnow()
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
@@ -320,15 +321,27 @@ if __name__=='__main__':
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     for date in dates:
-        add_itolap_bulks(date)
+        blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
+        if os.path.isfile(blkname):
+            print('\t',blkname,' already exists!')
+        else:
+            add_itolap_bulks(date)
     print('Overwriting files...','                                            ')
     for date in dates:
         blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
-        os.remove(blkname)
-        os.rename(blkname+'.2',blkname)
-            
+        if os.path.isfile(blkname):
+            print('\t',blkname,' already exists!')
+        else:
+            os.remove(blkname)
+            os.rename(blkname+'.2',blkname)
+                
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
     print('Execution time:',endtime-starttime)
     print('All good','                                                        ')
+    return
+
+# ------------------------------- RUN ROUTINES ------------------------------- #
+if __name__=='__main__':
+    main_blk_hindcast()

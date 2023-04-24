@@ -29,6 +29,8 @@ fdays           = 10
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
 scratchdir      = RUN_dir+'/SCRATCH/'
 today           = datetime.datetime.utcnow()
+fprefix         = 'crococeazaf'
+
 dates  = pd.date_range(
     (today-pd.Timedelta(days=hdays)).strftime('%F'),
     (today+pd.Timedelta(days=fdays)).strftime('%F')
@@ -66,18 +68,27 @@ def make_forecast_GFS(matlabexec='matlab -nodisplay -nosplash -nodesktop',
     os.chdir(maindir)
     return 
 
-
-# ------------------------------- RUN ROUTINES ------------------------------- #
-if __name__=='__main__':
+def main_blk_forecast():
+    """
+    This function just run all the previous routines and creates the file.
+    """
     starttime = datetime.datetime.utcnow()
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
-    print(' Running crocotools make_GFS.m, please wait...           ')
+    print(' Running crocotools make_GFS.m, please wait...                     ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
-    make_forecast_GFS()
+    blkname = CROCO_files_dir+fprefix+'_blk_'+today.strftime('%Y%m%d')+'.nc'
+    if os.path.isfile(blkname):
+            print('\t',blkname,' already exists!')
+    else:
+        make_forecast_GFS()
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
     print('Execution time:',endtime-starttime)
     print('All good','                                                        ')
+    return
+# ------------------------------- RUN ROUTINES ------------------------------- #
+if __name__=='__main__':
+    main_blk_forecast()
