@@ -4,13 +4,15 @@
 maindir='/ceaza/lucas/CROCO-CEAZAMAR/'
 cd $maindir
 
-now=$(date +%F\ %H:%M:%S)
+now=$(date +%F\ %H:%M:%S -u)
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CREATING CROCO BOUNDARY CONDITIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 echo $now  Creating hindcast atmospheric boundary conditions...
 ./make_blk_hindcast.py
 printf '\n\n'
 echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-now=$(date +%F\ %H:%M:%S)
+now=$(date +%F\ %H:%M:%S -u)
 echo $now  Creating forecast atmospheric boundary conditions...
 ./make_blk_forecast.py
 printf '\n\n'

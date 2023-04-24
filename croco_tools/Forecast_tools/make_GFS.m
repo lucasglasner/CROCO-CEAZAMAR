@@ -53,7 +53,7 @@ blk_prefix=[blk_prefix,'_'];
 %
 % time (in matlab time)
 %
-today=floor(now);
+today=floor(datenum(datestr(datenum(datetime('now', 'TimeZone','Z')),'yyyy-mm-dd')));
 %
 % date in 'Yorig' time
 %
