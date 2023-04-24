@@ -49,7 +49,7 @@ rundate=datenum(today)-datenum(Yorig,1,1);
 % GFS output name
 %
 gfsftype=1;  % GFS files
-gfs_name=[FRCST_dir,'GFS_',num2str(rundate),'.nc'];
+gfs_name=[FRCST_dir,'/GFS/GFS_',datestr(today,'yyyymmdd'),'.nc'];
 %
 % start
 %
@@ -109,7 +109,7 @@ fname=get_GFS_fname(gfs_date_GFS,gfs_run_time_GFS,gfsftype);
 %
 mask=getdap('',fname,'landsfc','[1:1]','',jrange,...
                i1min,i1max,i2min,i2max,i3min,i3max);
-mask(mask==1)=NaN;
+mask(mask==1)=1;
 mask(isfinite(mask))=1;
 %
 % Initialize arrays with subgrid dimensions

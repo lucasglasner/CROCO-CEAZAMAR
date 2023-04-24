@@ -43,7 +43,7 @@ DATADIR         = '/ceaza/lucas/CROCO-CEAZAMAR/DATA/'
 CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 Yorig           = 1950              
 ERA5_delay      = 6         
-ERA5_offset     = 2          
+ERA5_offset     = 10          
 itolap_era5     = 6   
 
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
@@ -291,6 +291,7 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
 
 # ------------------------------- RUN ROUTINES ------------------------------- #
 if __name__=='__main__':
+    starttime = datetime.datetime.utcnow()
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
     print(' Performing ERA5 data conversion, please wait...                   ')
@@ -322,4 +323,6 @@ if __name__=='__main__':
     #     add_itolap_bulks(date)
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
+    endtime = datetime.datetime.utcnow()
+    print('Execution time:',endtime-starttime)
     print('All good','                                                        ')

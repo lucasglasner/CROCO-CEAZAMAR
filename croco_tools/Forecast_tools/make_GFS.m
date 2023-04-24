@@ -60,9 +60,11 @@ rundate=datenum(today)-datenum(Yorig,1,1);
 %
 % GFS data name
 %
-gfs_name=[FRCST_dir,'GFS_',num2str(rundate),'.nc'];
+
+gfs_name=[FRCST_dir,'/GFS/GFS_',datestr(today,'yyyymmdd'),'.nc'];
 %
 %
+
 if level==0
   nc_suffix='.nc';
 else
@@ -110,17 +112,17 @@ tlen=length(time);
 %
 % bulk and forcing files
 %
-blkname=[blk_prefix,num2str(rundate),nc_suffix];
+blkname=[blk_prefix,datestr(today,'yyyymmdd'),nc_suffix];
 disp(['Create a new bulk file: ' blkname])
 create_bulk(blkname,grdname,CROCO_title,time,0);
 nc_blk=netcdf(blkname,'write');
-frcname=[frc_prefix,num2str(rundate),nc_suffix];
-disp(['Create a new forcing file: ' frcname])
-create_forcing(frcname,grdname,CROCO_title,...
-                       time,0,0,...
-                       0,0,0,...
-  	               0,0,0,0,0,0)
-nc_frc=netcdf(frcname,'write');
+% frcname=[frc_prefix,num2str(rundate),nc_suffix];
+% disp(['Create a new forcing file: ' frcname])
+% create_forcing(frcname,grdname,CROCO_title,...
+%                        time,0,0,...
+%                        0,0,0,...
+%   	               0,0,0,0,0,0)
+% nc_frc=netcdf(frcname,'write');
 % for l=1:tlen
 % nc_blk{'tair'}(l,:,:)=0;
 % nc_blk{'rhum'}(l,:,:)=0;
@@ -140,68 +142,69 @@ for l=1:tlen
   disp(['time index: ',num2str(l),' of total: ',num2str(tlen)])
   var=squeeze(nc{'tair'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'tair'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'tair'}(l-1,:,:)); 
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'tair'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
 
   var=squeeze(nc{'rhum'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'rhum'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'rhum'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'rhum'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   var=squeeze(nc{'prate'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'prate'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'prate'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'prate'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   var=squeeze(nc{'wspd'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    var=squeeze(nc{'wspd'}(l,:,:));
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'wspd'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'wspd'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'wspd'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   %Zonal wind speed
   var=squeeze(nc{'uwnd'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    uwnd=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    uwnd=interp2(lon1,lat1,uwnd,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    uwnd=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'uwnd'}(l-1,:,:));
-    uwnd=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    uwnd=interp2(lon1,lat1,uwnd,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    uwnd=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   %Meridian wind speed
   var=squeeze(nc{'vwnd'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    vwnd=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    vwnd=interp2(lon1,lat1,vwnd,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    vwnd=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'vwnd'}(l-1,:,:));
-    vwnd=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    vwnd=interp2(lon1,lat1,vwnd,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    vwnd=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
-  nc_frc{'uwnd'}(l,:,:)=rho2u_2d(uwnd.*cosa+vwnd.*sina);
-  nc_frc{'vwnd'}(l,:,:)=rho2v_2d(vwnd.*cosa-uwnd.*sina);
+  % nc_frc{'uwnd'}(l,:,:)=rho2u_2d(uwnd.*cosa+vwnd.*sina);
+  % nc_frc{'vwnd'}(l,:,:)=rho2v_2d(vwnd.*cosa-uwnd.*sina);
   
   nc_blk{'uwnd'}(l,:,:)=rho2u_2d(uwnd.*cosa+vwnd.*sina);
   nc_blk{'vwnd'}(l,:,:)=rho2v_2d(vwnd.*cosa-uwnd.*sina);
@@ -209,64 +212,64 @@ for l=1:tlen
   %Net longwave flux
   var=squeeze(nc{'radlw'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radlw'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'radlw'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radlw'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   %Downward longwave flux
   var=squeeze(nc{'radlw_in'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radlw_in'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'radlw_in'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radlw_in'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
    
   %Net solar short wave radiation
   var=squeeze(nc{'radsw'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radsw'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'radsw'}(l-1,:,:));
-    var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    %%var=get_missing_val(lon1,lat1,var,missval,Roa,default);
     nc_blk{'radsw'}(l,:,:)=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   var=squeeze(nc{'tx'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    tx=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    tx=interp2(lon1,lat1,tx,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    tx=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'tx'}(l-1,:,:));
-    tx=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    tx=interp2(lon1,lat1,tx,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    tx=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
   var=squeeze(nc{'ty'}(l,:,:));
   if mean(mean(isnan(var)~=1))
-    ty=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    ty=interp2(lon1,lat1,ty,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    ty=interp2(lon1,lat1,var,lon,lat,interp_method);
   else
     var=squeeze(nc{'ty'}(l-1,:,:));
-    ty=get_missing_val(lon1,lat1,var,missval,Roa,default);
-    ty=interp2(lon1,lat1,ty,lon,lat,interp_method);
+    %var=get_missing_val(lon1,lat1,var,missval,Roa,default);
+    ty=interp2(lon1,lat1,var,lon,lat,interp_method);
   end
   
-  nc_frc{'sustr'}(l,:,:)=rho2u_2d(tx.*cosa+ty.*sina);
-  nc_frc{'svstr'}(l,:,:)=rho2v_2d(ty.*cosa-tx.*sina);
+  % nc_frc{'sustr'}(l,:,:)=rho2u_2d(tx.*cosa+ty.*sina);
+  % nc_frc{'svstr'}(l,:,:)=rho2v_2d(ty.*cosa-tx.*sina);
   
   nc_blk{'sustr'}(l,:,:)=rho2u_2d(tx.*cosa+ty.*sina);
   nc_blk{'svstr'}(l,:,:)=rho2v_2d(ty.*cosa-tx.*sina);
 end
 % 
-close(nc_frc);
+% close(nc_frc);
 close(nc_blk);
 close(nc)
 %---------------------------------------------------------------

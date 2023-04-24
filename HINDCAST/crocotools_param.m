@@ -380,8 +380,8 @@ add_tides    = 0;       % 1: add tides
 %
 % Overlap parameters 
 %
-itolap_qscat = 2;       % 2 records for daily  QSCAT
-itolap_ncep  = 8;       % 8 records for 4-daily NCEP
+itolap_qscat = 0;       % 2 records for daily  QSCAT
+itolap_ncep  = 0;       % 8 records for 4-daily NCEP
 %
 %--------------------------------------------------
 % Options for make_QSCAT_daily and make_QSCAT_clim   
@@ -401,7 +401,7 @@ Reformat_ECMWF = 1;
 ECMWF_dir= [FORC_DATA_DIR,'ECMWF_',CROCO_config,'/'];  % ERA-I data dir. [croco format]
 My_ECMWF_dir=[FORC_DATA_DIR,'ERAI/'];                  % ERA-I native data downloaded 
                                                        % with python script
-itolap_ecmwf = 3;                                      % 3 records for daily  ECMWF
+itolap_ecmwf = 0;                                      % 3 records for daily  ECMWF
 %
 %--------------------------------------------------
 %  Options for make_ERA5 and make_hindcast_ERA5
@@ -411,7 +411,7 @@ ERA5_dir    = [RUN_dir,'/SCRATCH/'];          % ERA5 data dir. [croco format]
 My_ERA5_dir = [FORC_DATA_DIR,'/ERA5/'];       % ERA5 native data downloaded with python script
 itolap_era5 = 0;                              % 2 records = 2 hours
 ERA5_delay  = 6;                              % Delay days of ERA5 NRT product
-ERA5_offset = 2;                              % Days of ERA5 NRT to compute from the latest
+ERA5_offset = 10;                             % Days of ERA5 NRT to compute from the latest
 
 %
 %
@@ -419,7 +419,7 @@ ERA5_offset = 2;                              % Days of ERA5 NRT to compute from
 % Options for make_OGCM or make_OGCM_mercator
 %--------------------------------------------
 %
-OGCM        = 'SODA';        % Select OGCM: SODA, ECCO, mercator
+OGCM        = 'mercator';        % Select OGCM: SODA, ECCO, mercator
 %
 OGCM_dir    = [FORC_DATA_DIR,OGCM,'_',CROCO_config,'/'];  % OGCM data dir. [croco format]
 %
@@ -443,8 +443,8 @@ rmdepth     = 2;
 %
 % Overlap parameters : nb of records around each monthly sequence
 %
-itolap_a    = 1;   % before
-itolap_p    = 1;   % after
+itolap_0    = 1;   % before
+itolap_0    = 1;   % after
                    %
 %--------------------------
 % Options for make_bry_WKB 
@@ -466,21 +466,21 @@ wkb_obc= [1 1 1 1];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-FRCST_dir = [FORC_DATA_DIR,'Forecast/'];  % path to local OGCM data directory
+FRCST_dir = [FORC_DATA_DIR];  % path to local OGCM data directory
 %
 % Number of hindcast/forecast days
 %
 if strcmp(OGCM,'ECCO')
   hdays=1;
-  fdays=6;
+  fdays=0;
 elseif strcmp(OGCM,'mercator')
   hdays=1;
-  fdays=3;
+  fdays=0;
 end
 %
 % Local time= UTC + timezone
 %
-timezone = +2;
+timezone = 0;
 %
 % Add tides
 %

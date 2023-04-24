@@ -66,7 +66,7 @@ close(nc);
 
 % Define latest ERA5 data as today date minus the defined ERA5 delay
 % Then try to create bulks for the last 10 days since the latest ERA5 file
-now = today-ERA5_delay;
+now = datenum(datetime('now', 'TimeZone','Z'))-ERA5_delay;
 
 %
 %Loop on the years and the months
