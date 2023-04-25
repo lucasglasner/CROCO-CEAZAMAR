@@ -175,7 +175,7 @@ if (vtransform == 1)
     nc{'sc_r'}.standard_name = 'ocena_s_coordinate_g1';
 elseif (vtransform == 2)
     nc{'sc_r'}.standard_name = ncchar('ocena_s_coordinate_g2');
-    nc{'sc_r'}.standard_name = 'ocena_s_coordinate_g2'     
+    nc{'sc_r'}.standard_name = 'ocena_s_coordinate_g2';
 end
 nc{'sc_r'}.formula_terms = ncchar('s: s_rho C: Cs_r eta: zeta depth: h depth_c: hc');
 nc{'sc_r'}.formula_terms = 's: s_rho C: Cs_r eta: zeta depth: h depth_c: hc';
@@ -647,7 +647,7 @@ if obc(4)==1
   nc{'temp_west'}(:) =  0; 
   nc{'salt_west'}(:) =  0;
 end 
-close(nc)
+close(nc);
 return
 
 

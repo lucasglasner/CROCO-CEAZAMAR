@@ -43,17 +43,18 @@ from netCDF4 import Dataset as netcdf
 RUN_dir         = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/'
 DATADIR         = '/ceaza/lucas/CROCO-CEAZAMAR/DATA/' 
 CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
+SCRATCH_dir      = RUN_dir+'/SCRATCH/'
 Yorig           = 1950              
 ERA5_delay      = 6          
 ERA5_offset     = 485          
-itolap_era5     = 6   
 
+# GLOBAL PARAMETERS
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
-scratchdir      = RUN_dir+'/SCRATCH/'
 today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazah'
 
 # ERA5 PARAMETERS
+itolap_era5     = 6  
 pathERA5raw = DATADIR+'/ERA5/'
 dates  = pd.date_range(
     (today-pd.Timedelta(days=ERA5_delay+ERA5_offset)).strftime('%F'),
@@ -92,7 +93,7 @@ def ERA5_coefficients():
  
  
  
-def ERA5_convert(fname, date, outdir=scratchdir, Yorig=Yorig):
+def ERA5_convert(fname, date, outdir=SCRATCH_dir, Yorig=Yorig):
     """
     This function is a translate of ./ERA5_convert.py
     croco_tools script for any kind of temporal data
@@ -292,7 +293,7 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         ntime = np.concatenate([data.bulk_time.values, ftimes])
         data  = data.reindex({'bulk_time':ntime}).ffill('bulk_time')
     
-    ofname = fname.replace(CROCO_files_dir,scratchdir)
+    ofname = fname.replace(CROCO_files_dir,SCRATCH_dir)
     data.to_netcdf(ofname,
                    unlimited_dims=['bulk_time'])
     # for var in data.keys():
@@ -331,14 +332,14 @@ def main_blk_hindcast():
         add_itolap_bulks(date)
     print('\n','')
     for date in dates:
-        blkname = scratchdir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
+        blkname = SCRATCH_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
         if os.path.isfile(blkname):
-            print('Overwriting file...',blkname.replace(scratchdir,''),'      ')
-            shutil.move(blkname,blkname.replace(scratchdir,CROCO_files_dir))         
+            print('Overwriting file...',blkname.replace(SCRATCH_dir,''),'      ')
+            shutil.move(blkname,blkname.replace(SCRATCH_dir,CROCO_files_dir))         
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     print('Cleaning scratch directory...                                      ')
-    for f in glob(scratchdir+'/*.nc'):
+    for f in glob(SCRATCH_dir+'/*.nc'):
         os.remove(f)
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)

@@ -423,10 +423,10 @@ OGCM        = 'mercator';        % Select OGCM: SODA, ECCO, mercator
 %
 OGCM_dir    = [FORC_DATA_DIR,OGCM,'_',CROCO_config,'/'];  % OGCM data dir. [croco format]
 %
-bry_prefix  = [CROCO_files_dir,'crococeazah_bry_',OGCM,'_'];    % generic boundary file name
-clm_prefix  = [CROCO_files_dir,'crococeazah_clm_',OGCM,'_'];    % generic climatology file name
-ini_prefix  = [CROCO_files_dir,'crococeazah_ini_',OGCM,'_'];    % generic initial file name
-OGCM_prefix = [OGCM,'_'];                                 % generic OGCM file name 
+bry_prefix  = [CROCO_files_dir,'crococeazah_bry_'];    % generic boundary file name
+clm_prefix  = [CROCO_files_dir,'crococeazah_clm_'];    % generic climatology file name
+ini_prefix  = [CROCO_files_dir,'crococeazah_ini_'];    % generic initial file name
+OGCM_prefix = [OGCM,'_'];                              % generic OGCM file name 
 
 if strcmp(OGCM,'mercator')
     % For GLORYS 12 reanalysis extraction + download using python motuclient
@@ -496,6 +496,9 @@ add_tides_fcst = 1;       % 1: add tides
 %  Copernicus web site (Mercator, UK Met Office ...)
 %
 if strcmp(OGCM,'mercator')
+  SCRATCH_dir     = [RUN_dir,'/SCRATCH/'];
+  MERCATOR_delay  = 6;
+  MERCATOR_offset = 1;
   user     = 'XXX';
   password = 'XXX';
 
