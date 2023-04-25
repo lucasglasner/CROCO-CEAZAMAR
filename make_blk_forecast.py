@@ -86,7 +86,7 @@ def main_blk_forecast():
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
-    print('Execution time:',endtime-starttime)
+    print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')
     return
 # ------------------------------- RUN ROUTINES ------------------------------- #

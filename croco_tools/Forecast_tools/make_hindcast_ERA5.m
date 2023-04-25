@@ -78,13 +78,13 @@ disp(['Loop on the desired days: ',datestr(now-ERA5_offset,'yyyymmdd'),' - ',dat
 for t=(now-ERA5_offset):now
     blkname=[blk_prefix,datestr(t,'yyyymmdd'),nc_suffix];       
     frcname=[frc_prefix,datestr(t,'yyyymmdd'),nc_suffix];
-    if and(exist([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'],'file')==0,exist(blkname,'file')==2)
+    if and(exist([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'],'file')==2,exist(blkname,'file')==2)
         disp([blkname,' already exists!!'])
     else
         % Get the ERA5 horizontal grids (it should be the same for every file)
         % Use ERA5_offset days ago data from the latest ERA5 file
-        nc=netcdf([ERA5_dir,'LSM_',datestr(now-ERA5_offset,'yyyymmdd'),'.nc']);
-        disp(['Use this land file :',char([ERA5_dir,'LSM_',datestr(now-ERA5_offset,'yyyymmdd'),'.nc'])])
+        nc=netcdf([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc']);
+        disp(['Use this land file :',char([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'])])
 
         lon1=nc{'lon'}(:);
         lat1=nc{'lat'}(:);
@@ -207,4 +207,6 @@ for t=(now-ERA5_offset):now
         end
     end
 end
+disp('Done')
+disp(' ')
 

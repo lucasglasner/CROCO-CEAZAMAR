@@ -29,10 +29,12 @@ matlab and nco (e.g ncks, ncatted, ncpdq, etc) executables exists on system path
 # ---------------------------------- IMPORTS --------------------------------- #
 import os
 import json
+import shutil
 import datetime
 import numpy as np
 import pandas as pd
 import xarray as xr
+from glob import glob
 from netCDF4 import Dataset as netcdf
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
@@ -42,8 +44,8 @@ RUN_dir         = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/'
 DATADIR         = '/ceaza/lucas/CROCO-CEAZAMAR/DATA/' 
 CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 Yorig           = 1950              
-ERA5_delay      = 6         
-ERA5_offset     = 3          
+ERA5_delay      = 6          
+ERA5_offset     = 485          
 itolap_era5     = 6   
 
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
@@ -228,7 +230,7 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
     
     Args:
         date (datetime): target date of file to fix
-        itolap (int, optional): overlap records. Defaults to itolap_era5.
+        itolap (int, optional): overlap records. Defaults to itolap_era5 (see above).
         bulkfreq (int, optional): era5 frequency in hours. Defaults to 1.
     """
     # Define previous and following dates
@@ -245,8 +247,11 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         data    = xr.open_dataset(fname, decode_times=False, decode_cf=False,
                                 decode_coords=False, decode_timedelta=False,
                                 use_cftime=False)
-    except:
-        print('\t',fname,' not found, doing nothing. !!')
+        if len(data.bulk_time)==24/bulkfreq+itolap*2:
+            print('\t',fname,' already has overlap times !!')
+            return
+    except Exception as e:
+        print('\t',fname,e)
         return
     # Define time frequency in bulk files
     dt      = bulkfreq/24
@@ -261,6 +266,9 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         pdata = xr.open_dataset(fnamep, decode_times=False, decode_cf=False,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)
+        if len(pdata.bulk_time)==24/bulkfreq+itolap*2:
+            # If pdata already has overlaps just grab the inner data
+            pdata = pdata.isel(bulk_time=slice(itolap,-itolap))
         pdata = pdata.isel(bulk_time=slice(-(itolap+1),-1))
         data  = xr.concat([pdata,data],'bulk_time')
     else:
@@ -274,6 +282,9 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         fdata = xr.open_dataset(fnamef, decode_times=False, decode_cf=False,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)
+        if len(fdata.bulk_time)==24/bulkfreq+itolap*2:
+            # If fdata already has overlaps just grab the inner data
+            fdata = fdata.isel(bulk_time=slice(itolap,-itolap))
         fdata = fdata.isel(bulk_time=slice(0,itolap))
         data  = xr.concat([data,fdata],'bulk_time')
     else:
@@ -281,13 +292,15 @@ def add_itolap_bulks(date, itolap=itolap_era5, bulkfreq=1):
         ntime = np.concatenate([data.bulk_time.values, ftimes])
         data  = data.reindex({'bulk_time':ntime}).ffill('bulk_time')
     
-    data.to_netcdf(fname+'.2', unlimited_dims=['bulk_time'])
-    for var in data.keys():
-        os.system('ncatted -a _FillValue,'+var+',d,, '+fname+'.2')
-    os.system('ncatted -a _FillValue,bulk_time,d,, '+fname+'.2')
+    ofname = fname.replace(CROCO_files_dir,scratchdir)
+    data.to_netcdf(ofname,
+                   unlimited_dims=['bulk_time'])
+    # for var in data.keys():
+    #     os.system('ncatted -a _FillValue,'+var+',d,, '+ofname)
+    # os.system('ncatted -a _FillValue,bulk_time,d,, '+ofname)
     return 
-    
-    
+
+
 def main_blk_hindcast():
     """
     This function just run all the previous routines and creates the file.
@@ -301,11 +314,7 @@ def main_blk_hindcast():
     for date in dates:
         fname = pathERA5raw+date.strftime('%F')+'.nc'
         print('Transforming to croco_tools format:',fname)
-        blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
-        if os.path.isfile(blkname):
-            print('\t',blkname,' already exists!')
-        else:
-            ERA5_convert(fname,date)
+        ERA5_convert(fname,date)
         print('Done\n')
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
@@ -313,32 +322,26 @@ def main_blk_hindcast():
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     make_hindcast_ERA5()
-    print('\nCleaning scratch directory...','                                 ')
-    os.system('rm -rf '+scratchdir+'/*.nc')
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
     print(' Adding overlap days to croco_blk files, please wait...            ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     for date in dates:
-        blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
-        if os.path.isfile(blkname):
-            print('\t',blkname,' already exists!')
-        else:
-            add_itolap_bulks(date)
-    print('Overwriting files...','                                            ')
+        add_itolap_bulks(date)
+    print('\n','')
     for date in dates:
-        blkname = CROCO_files_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
+        blkname = scratchdir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
         if os.path.isfile(blkname):
-            print('\t',blkname,' already exists!')
-        else:
-            os.remove(blkname)
-            os.rename(blkname+'.2',blkname)
-                
+            print('Overwriting file...',blkname.replace(scratchdir,''),'      ')
+            shutil.move(blkname,blkname.replace(scratchdir,CROCO_files_dir))         
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
+    print('Cleaning scratch directory...                                      ')
+    for f in glob(scratchdir+'/*.nc'):
+        os.remove(f)
     endtime = datetime.datetime.utcnow()
-    print('Execution time:',endtime-starttime)
+    print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')
     return
 
