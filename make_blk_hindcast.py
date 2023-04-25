@@ -39,14 +39,14 @@ from netCDF4 import Dataset as netcdf
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
 # crocotools_param.m static parameters
-# Should be the same in crocotools_param.m !!!
+# Should be the same in ./HINDCAST/crocotools_param.m !!!
 RUN_dir         = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/'
 DATADIR         = '/ceaza/lucas/CROCO-CEAZAMAR/DATA/' 
 CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 SCRATCH_dir      = RUN_dir+'/SCRATCH/'
 Yorig           = 1950              
 ERA5_delay      = 6          
-ERA5_offset     = 485          
+ERA5_offset     = 3          
 
 # GLOBAL PARAMETERS
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'

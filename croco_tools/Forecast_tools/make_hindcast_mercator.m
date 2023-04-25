@@ -114,65 +114,71 @@ disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(['Loop on the desired days: ',datestr(now-MERCATOR_offset,'yyyymmdd'),' - ',datestr(now,'yyyymmdd')])
 
 for t=(now-MERCATOR_offset):now
-  %---------------------------------------------------------------
-  % Get time array 
-  %---------------------------------------------------------------
-  disp(' ')
-  disp(['Processing date: ',datestr(t,'yyyymmdd')])
-  disp(' ')
+  bryname=[bry_prefix,datestr(t,'yyyymmdd'),nc_suffix];
+  clmname=[clm_prefix,datestr(t,'yyyymmdd'),nc_suffix];
   mercator_name=[SCRATCH_dir,'/mercator_',datestr(t,'yyyymmdd'),'.cdf'];
-  nc=netcdf(mercator_name);
-  OGCM_time=nc{'time'}(:);
-  time_cycle=0;
-  delta=1; % >1 if subsampling
-  trange=[1:delta:length(OGCM_time)];
-  time=zeros(length(trange),1);
-  for i=1:length(trange)
-    time(i)=OGCM_time(trange(i));
-  end
+  if and(exist(mercator_name,'file')==2,exist(bryname,'file')==2)
+    disp([bryname,' already exists!!'])
+  else
+    %---------------------------------------------------------------
+    % Get time array 
+    %---------------------------------------------------------------
+    disp(' ')
+    disp(['Processing date: ',datestr(t,'yyyymmdd')])
+    disp(' ')
 
-  if makeclim==1 | makebry==1
-    if makebry==1
-      bryname=[bry_prefix,datestr(t,'yyyymmdd'),nc_suffix];
-      create_bryfile(bryname,grdname,CROCO_title,obc,...
-                     theta_s,theta_b,hc,N,...
-                     time,time_cycle,'clobber',vtransform);
-      nc_bry=netcdf(bryname,'write');
-    else
-      nc_bry=[];
+    nc=netcdf(mercator_name);
+    OGCM_time=nc{'time'}(:);
+    time_cycle=0;
+    delta=1; % >1 if subsampling
+    trange=[1:delta:length(OGCM_time)];
+    time=zeros(length(trange),1);
+    for i=1:length(trange)
+      time(i)=OGCM_time(trange(i));
     end
-    if makeclim==1
-      clmname=[clm_prefix,datestr(t,'yyyymmdd'),nc_suffix];
-      create_climfile(clmname,grdname,CROCO_title,...
+
+    if makeclim==1 | makebry==1
+      if makebry==1
+        create_bryfile(bryname,grdname,CROCO_title,obc,...
                       theta_s,theta_b,hc,N,...
                       time,time_cycle,'clobber',vtransform);
-      nc_clm=netcdf(clmname,'write');
-    else
-      nc_clm=[];
+        nc_bry=netcdf(bryname,'write');
+      else
+        nc_bry=[];
+      end
+      if makeclim==1
+        clmname=[clm_prefix,datestr(t,'yyyymmdd'),nc_suffix];
+        create_climfile(clmname,grdname,CROCO_title,...
+                        theta_s,theta_b,hc,N,...
+                        time,time_cycle,'clobber',vtransform);
+        nc_clm=netcdf(clmname,'write');
+      else
+        nc_clm=[];
+      end
     end
-  end
 
-  %---------------------------------------------------------------
-  % Perform interpolations for all selected records
-  %---------------------------------------------------------------
-  for tndx=1:length(time)
-    disp([' Time step : ',num2str(tndx),' of ',num2str(length(time)),' :'])
-    interp_OGCM_frcst(mercator_name,Roa,interp_method,...
-                      lonU,latU,lonV,latV,lonT,latT,Z,trange(tndx),...
-                      nc_clm,nc_bry,lon,lat,angle,h,pm,pn,rmask, ...
-                      tndx,vtransform,obc)
+    %---------------------------------------------------------------
+    % Perform interpolations for all selected records
+    %---------------------------------------------------------------
+    for tndx=1:length(time)
+      disp([' Time step : ',num2str(tndx),' of ',num2str(length(time)),' :'])
+      interp_OGCM_frcst(mercator_name,Roa,interp_method,...
+                        lonU,latU,lonV,latV,lonT,latT,Z,trange(tndx),...
+                        nc_clm,nc_bry,lon,lat,angle,h,pm,pn,rmask, ...
+                        tndx,vtransform,obc)
+    end
+    %
+    % Close CROCO files
+    %
+    if ~isempty(nc_clm)
+      close(nc_clm);
+    end
+    if ~isempty(nc_bry)
+      close(nc_bry);
+    end
+    close(nc); 
+    disp(' ')
   end
-  %
-  % Close CROCO files
-  %
-  if ~isempty(nc_clm)
-    close(nc_clm);
-  end
-  if ~isempty(nc_bry)
-    close(nc_bry);
-  end
-  close(nc); 
-  disp(' ')
 end
 
 

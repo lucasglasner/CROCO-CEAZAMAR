@@ -237,7 +237,7 @@ zref = -1000;
 %  (used in make_clim, make_biol, make_bry,
 %   make_OGCM.m and make_OGCM_frcst.m)
 %
-makeini    = 1;   % initial data
+makeini    = 0;   % initial data
 makeclim   = 0;   % climatological data (for boundaries and nudging layers)
 makebry    = 1;   % lateral boundary data
 makenpzd   = 0;   % initial and boundary data for NChlPZD and N2ChlPZD2 models
@@ -411,7 +411,7 @@ ERA5_dir    = [RUN_dir,'/SCRATCH/'];          % ERA5 data dir. [croco format]
 My_ERA5_dir = [FORC_DATA_DIR,'/ERA5/'];       % ERA5 native data downloaded with python script
 itolap_era5 = 0;                              % 2 records = 2 hours
 ERA5_delay  = 6;                              % Delay days of ERA5 NRT product
-ERA5_offset = 485;                            % Days of ERA5 NRT to compute from the latest
+ERA5_offset = 3;                              % Days of ERA5 NRT to compute from the latest
 
 %
 %
