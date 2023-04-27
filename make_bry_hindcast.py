@@ -18,6 +18,9 @@ import datetime
 import numpy as np
 import pandas as pd
 from glob import glob
+import xarray as xr
+import shutil
+from utils import add_itolap,cleandirectory
 
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
@@ -29,7 +32,7 @@ CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 SCRATCH_dir     = RUN_dir+'/SCRATCH/'
 Yorig           = 1950       
 MERCATOR_delay  = 6
-MERCATOR_offset = 1
+MERCATOR_offset = 2
  
  
 # GLOBAL PARAMETERS
@@ -50,14 +53,11 @@ def make_hindcast_mercator(matlabexec='matlab -nodisplay -nosplash -nodesktop',
             execdirectory=RUN_dir):
     """
     This function is responsable of running adapted crocotools routine
-    make_hindcast_mercator.m. The functions changes directory to the execution dir,
+    make_hindcast_mercator.m. The function changes directory to the execution dir,
     then run the start.m file, and run the crocotools routine as usual.
     For this function to work is important to have a consistent
     crocotools_param.m file and configuration (crocotools paths, variables, etc).
     
-    I have modified the standard make_GFS.m routine to include tides and to
-    be consistent with the filenames used in this forecast package
-
     Args:
         matlabexec (str, optional):
             path to matlab executable with respective flags.
@@ -75,6 +75,7 @@ def make_hindcast_mercator(matlabexec='matlab -nodisplay -nosplash -nodesktop',
     os.chdir(maindir)
     return 
 
+
 def main_bry_hindcast():
     """
     This function just run all the previous routines and creates the file.
@@ -85,12 +86,26 @@ def main_bry_hindcast():
     print(' Running crocotools make_hindcast_mercator.m, please wait...       ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
-    make_hindcast_mercator()
-    print('Cleaning scratch directory...                                      ')
-    for f in glob(SCRATCH_dir+'/*.nc'):
-        os.remove(f)
+    # make_hindcast_mercator()
+    print('-------------------------------------------------------------------')
+    print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
+    print(' Adding overlap days to croco_bry files, please wait...            ')
+    print(' Dates =',dates,'                                                  ')
+    print('-------------------------------------------------------------------')
+    for date in dates:
+        add_itolap(date=date, itolap=itolap_mercator, timename='bry_time',
+                   inputfiledir=CROCO_files_dir, outputfiledir=SCRATCH_dir,
+                   fprefix=fprefix+'_bry_', freq=6)
+    print('\n','')
+    # for date in dates:
+    #     bryname = SCRATCH_dir+fprefix+'_bry_'+date.strftime('%Y%m%d')+'.nc'
+    #     if os.path.isfile(bryname):
+    #         print('Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
+    #         shutil.move(bryname,bryname.replace(SCRATCH_dir,CROCO_files_dir))         
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
+    print('Cleaning scratch directory...                                      ')
+    # cleandirectory(SCRATCH_dir, ['*.nc','*.cdf'])
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')

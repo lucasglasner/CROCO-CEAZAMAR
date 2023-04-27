@@ -78,133 +78,132 @@ disp(['Loop on the desired days: ',datestr(now-ERA5_offset,'yyyymmdd'),' - ',dat
 for t=(now-ERA5_offset):now
     blkname=[blk_prefix,datestr(t,'yyyymmdd'),nc_suffix];       
     frcname=[frc_prefix,datestr(t,'yyyymmdd'),nc_suffix];
-    if and(exist([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'],'file')==2,exist(blkname,'file')==2)
-        disp([blkname,' already exists!!'])
+    % if and(exist([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'],'file')==2,exist(blkname,'file')==2)
+    %     disp([blkname,' already exists!!'])
+
+    % Get the ERA5 horizontal grids (it should be the same for every file)
+    % Use ERA5_offset days ago data from the latest ERA5 file
+    nc=netcdf([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc']);
+    disp(['Use this land file :',char([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'])])
+
+    lon1=nc{'lon'}(:);
+    lat1=nc{'lat'}(:);
+    [lon1,lat1]=meshgrid(lon1,lat1);
+
+    mask=squeeze(nc{'LSM'}(1,:,:));
+    mask(mask ~=0 ) = 1; %we take the first record
+    mask = 1-mask ;
+    mask(mask ==0 ) = NaN ;
+    close(nc);
+
+    % for M=mo_min:mo_max
+    disp(' ')
+    disp(['Processing date: ',datestr(t,'yyyymmdd')])
+    disp(' ')
+    %-------------------------------------------------------------------%
+    %
+    % Process time (here in days), with LSM file (common for frc/blk)
+    %
+    %-------------------------------------------------------------------%
+    nc=netcdf([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc']);
+    ERA5_time=nc{'time'}(:);
+    close(nc);
+    dt=mean(gradient(ERA5_time));
+    disp(['dt=',num2str(dt)])
+    %-----------------------------------------------------------
+    %Variable overlapping timesteps : 2 at the beginning and 2 at the end
+    %------------------------------------------------------------
+    tlen0=length(ERA5_time);
+    disp(['tlen0=',num2str(tlen0)])
+    freq=1; % hourly
+    itolap=freq*itolap_era5;
+    tlen=tlen0+2*itolap;
+    disp(['tlen=',num2str(tlen)])
+    disp(['Overlap is ',num2str(itolap_era5),' records before and after'])     
+    time=0*(1:tlen);
+    time(itolap+1:tlen0+itolap)=ERA5_time;   
+    disp(['====================='])
+    disp('Compute time for croco file')
+    disp(['====================='])
+    for aa=1:itolap
+        time(aa)=time(itolap+1)-(itolap+1-aa)*dt;
+    end
+    for aa=1:itolap
+        time(tlen0+itolap+aa)=time(tlen0+itolap)+aa*dt;
+    end
+    
+    %-------------------------------------------------------------------%
+    %
+    % Create the CROCO bulk forcing files
+    %
+    % ------------------------------------------------------------------%
+    %
+    disp(['====================='])
+    disp('Create the blk/frc netcdf file')
+    disp(['====================='])
+    %
+    if makeblk==1 
+        disp(['Create a new bulk file: ' blkname])
+        create_bulk(blkname,grdname,CROCO_title,time,0);
+        disp([' '])
+    end
+    if makefrc==1
+        disp(['Create a new forcing file: ' frcname])
+        create_forcing(frcname,grdname,CROCO_title,...
+                        time,time,time,...
+                        time,time,time,...
+                        0,0,0,0,0,0);
+        disp([' '])
+    end
+    
+    %
+    % Open the CROCO forcing files
+    if makefrc==1
+        nc_frc=netcdf(frcname,'write');
     else
-        % Get the ERA5 horizontal grids (it should be the same for every file)
-        % Use ERA5_offset days ago data from the latest ERA5 file
-        nc=netcdf([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc']);
-        disp(['Use this land file :',char([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc'])])
-
-        lon1=nc{'lon'}(:);
-        lat1=nc{'lat'}(:);
-        [lon1,lat1]=meshgrid(lon1,lat1);
-
-        mask=squeeze(nc{'LSM'}(1,:,:));
-        mask(mask ~=0 ) = 1; %we take the first record
-        mask = 1-mask ;
-        mask(mask ==0 ) = NaN ;
-        close(nc);
-
-        % for M=mo_min:mo_max
+        nc_frc=[];
+    end
+    if makeblk==1
+        nc_blk=netcdf(blkname,'write');
+    else
+        nc_blk=[];
+    end 
+    disp(' ')
+    disp('======================================================================')
+    disp(['Perform interpolations for ',datestr(t,'yyyy-mm-dd'),'               '])
+    disp('======================================================================')
+    disp(' ')
+    
+    % Perform interpolations for the current month
+    %
+    for tndx=1:tlen0
+        if mod(tndx,6)==0
+            disp(['Step: ',num2str(tndx),' of ',num2str(tlen0)])
+        end
+        interp_hindcast_ERA5(ERA5_dir,datestr(t,'yyyymmdd'),Roa,interp_method,lon1,lat1,...
+                            mask,tndx,nc_frc,nc_blk,lon,lat,angle,tndx+itolap)	
+    end
+    
+    %
+    % Add the tides
+    %
+    if add_tides_fcst==1
         disp(' ')
-        disp(['Processing date: ',datestr(t,'yyyymmdd')])
-        disp(' ')
-        %-------------------------------------------------------------------%
-        %
-        % Process time (here in days), with LSM file (common for frc/blk)
-        %
-        %-------------------------------------------------------------------%
-        nc=netcdf([ERA5_dir,'LSM_',datestr(t,'yyyymmdd'),'.nc']);
-        ERA5_time=nc{'time'}(:);
-        close(nc);
-        dt=mean(gradient(ERA5_time));
-        disp(['dt=',num2str(dt)])
-        %-----------------------------------------------------------
-        %Variable overlapping timesteps : 2 at the beginning and 2 at the end
-        %------------------------------------------------------------
-        tlen0=length(ERA5_time);
-        disp(['tlen0=',num2str(tlen0)])
-        freq=1; % hourly
-        itolap=freq*itolap_era5;
-        tlen=tlen0+2*itolap;
-        disp(['tlen=',num2str(tlen)])
-        disp(['Overlap is ',num2str(itolap_era5),' records before and after'])     
-        time=0*(1:tlen);
-        time(itolap+1:tlen0+itolap)=ERA5_time;   
-        disp(['====================='])
-        disp('Compute time for croco file')
-        disp(['====================='])
-        for aa=1:itolap
-            time(aa)=time(itolap+1)-(itolap+1-aa)*dt;
+        disp(['Create a new only tide forcing file: ' frcname])
+        create_forcing_tideonly(frcname,grdname,CROCO_title)
+        disp(['Add tidal data ... '])
+        [Y,M,d,h,mi,s] = datevec(datestr(t,'yyyy-mm-dd'));
+        add_tidal_data(tidename,grdname,frcname,Ntides,tidalrank, ...
+                    Yorig,Y,M,coastfileplot,sal_tides,salname)
+    end
+    %
+    % Close the CROCO forcing files
+    %
+    if ~isempty(nc_frc)
+        close(nc_frc);
         end
-        for aa=1:itolap
-            time(tlen0+itolap+aa)=time(tlen0+itolap)+aa*dt;
-        end
-        
-        %-------------------------------------------------------------------%
-        %
-        % Create the CROCO bulk forcing files
-        %
-        % ------------------------------------------------------------------%
-        %
-        disp(['====================='])
-        disp('Create the blk/frc netcdf file')
-        disp(['====================='])
-        %
-        if makeblk==1 
-            disp(['Create a new bulk file: ' blkname])
-            create_bulk(blkname,grdname,CROCO_title,time,0);
-            disp([' '])
-        end
-        if makefrc==1
-            disp(['Create a new forcing file: ' frcname])
-            create_forcing(frcname,grdname,CROCO_title,...
-                            time,time,time,...
-                            time,time,time,...
-                            0,0,0,0,0,0);
-            disp([' '])
-        end
-        
-        %
-        % Open the CROCO forcing files
-        if makefrc==1
-            nc_frc=netcdf(frcname,'write');
-        else
-            nc_frc=[];
-        end
-        if makeblk==1
-            nc_blk=netcdf(blkname,'write');
-        else
-            nc_blk=[];
-        end 
-        disp(' ')
-        disp('======================================================================')
-        disp(['Perform interpolations for ',datestr(t,'yyyy-mm-dd'),'               '])
-        disp('======================================================================')
-        disp(' ')
-        
-        % Perform interpolations for the current month
-        %
-        for tndx=1:tlen0
-            if mod(tndx,6)==0
-                disp(['Step: ',num2str(tndx),' of ',num2str(tlen0)])
-            end
-            interp_hindcast_ERA5(ERA5_dir,datestr(t,'yyyymmdd'),Roa,interp_method,lon1,lat1,...
-                                mask,tndx,nc_frc,nc_blk,lon,lat,angle,tndx+itolap)	
-        end
-        
-        %
-        % Add the tides
-        %
-        if add_tides_fcst==1
-            disp(' ')
-            disp(['Create a new only tide forcing file: ' frcname])
-            create_forcing_tideonly(frcname,grdname,CROCO_title)
-            disp(['Add tidal data ... '])
-            [Y,M,d,h,mi,s] = datevec(datestr(t,'yyyy-mm-dd'));
-            add_tidal_data(tidename,grdname,frcname,Ntides,tidalrank, ...
-                        Yorig,Y,M,coastfileplot,sal_tides,salname)
-        end
-        %
-        % Close the CROCO forcing files
-        %
-        if ~isempty(nc_frc)
-            close(nc_frc);
-            end
-        if ~isempty(nc_blk)
-            close(nc_blk);
-        end
+    if ~isempty(nc_blk)
+        close(nc_blk);
     end
 end
 disp('Done')

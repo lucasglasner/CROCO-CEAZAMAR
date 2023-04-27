@@ -411,7 +411,7 @@ ERA5_dir    = [RUN_dir,'/SCRATCH/'];          % ERA5 data dir. [croco format]
 My_ERA5_dir = [FORC_DATA_DIR,'/ERA5/'];       % ERA5 native data downloaded with python script
 itolap_era5 = 0;                              % 2 records = 2 hours
 ERA5_delay  = 6;                              % Delay days of ERA5 NRT product
-ERA5_offset = 3;                              % Days of ERA5 NRT to compute from the latest
+ERA5_offset = 2;                              % Days of ERA5 NRT to compute from the latest
 
 %
 %
@@ -498,7 +498,7 @@ add_tides_fcst = 1;       % 1: add tides
 if strcmp(OGCM,'mercator')
   SCRATCH_dir     = [RUN_dir,'/SCRATCH/'];
   MERCATOR_delay  = 6;
-  MERCATOR_offset = 1;
+  MERCATOR_offset = 2;
   user     = 'XXX';
   password = 'XXX';
 
