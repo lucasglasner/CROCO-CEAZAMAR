@@ -33,7 +33,13 @@ def cleandirectory(directory, filetypes=['*']):
             os.remove(f)
     return
 
-def sliceandconcat_crocoblk(fname,data, itolap, timename, freq, timeshift):
+def sliceandconcat_crocoblk(fname, data, itolap, timename, freq, timeshift):
+    """
+    This function grabs the blk data and adds itolaps based on the file in 
+    "fname". Also it is needed to specify the time dimension name
+    the time frequency and a string "timeshift" for indicating if 
+    it will be used a previous or following file (in time)
+    """
     if timeshift=='previous':
         print('\t','Previous day file found: ',fname)
         pdata = xr.open_dataset(fname, decode_times=False, decode_cf=False,
@@ -105,32 +111,48 @@ def add_itolap(date, itolap,timename,
     ftimes  = sorted(np.array([data[timename][-1].item()+(n+1)*dt
                         for n in range(itolap)]))
 
-    # If previous day data exists open and concat,
-    # else fill backwards with first record
-    if os.path.isfile(fnamep):
-        if 'blk' in fprefix:
+    if 'blk' in fprefix:
+        # If previous day data exists open and concat,
+        # else fill backwards with first record
+        if os.path.isfile(fnamep):
             data = sliceandconcat_crocoblk(fnamep,data, itolap=itolap,
                                         timename=timename, freq=freq,
                                         timeshift='previous')
-    else:
-        print('\t','Previous day file not found:',
-              'filling backwards with the first record')
-        ntime = np.concatenate([ptimes,data[timename].values])
-        data  = data.reindex({timename:ntime}).bfill(timename)
+        else:
+            print('\t','Previous day file not found:',
+                'filling backwards with the first record')
+            ntime = np.concatenate([ptimes,data[timename].values])
+            data  = data.reindex({timename:ntime}).bfill(timename)
         
-    # If following day data exists open and concat,
-    # else forward fill with latest record
-    
-    if os.path.isfile(fnamef):
-        if 'blk' in fprefix:
+        # If following day data exists open and concat,
+        # else forward fill with latest record
+        if os.path.isfile(fnamef):
             data = sliceandconcat_crocoblk(fnamef,data, itolap=itolap,
                                         timename=timename, freq=freq,
                                         timeshift='following')
+        else:
+            print('\t','Following day file not found:',
+                'filling forwards with the last record')
+            ntime = np.concatenate([data[timename].values, ftimes])
+            data  = data.reindex({timename:ntime}).ffill(timename)
+            
+    elif 'bry' in fprefix:
+        # If previous day data exists open and concat,
+        # else fill backwards with first record
+        if os.path.isfile(fnamep):
+            pass
+        else:
+            pass
+        
+        # If following day data exists open and concat,
+        # else forward fill with latest record
+        if os.path.isfile(fnamef):
+            pass
+        else:
+            pass
+        return
     else:
-        print('\t','Following day file not found:',
-              'filling forwards with the last record')
-        ntime = np.concatenate([data[timename].values, ftimes])
-        data  = data.reindex({timename:ntime}).ffill(timename)
+        raise ValueError('File prefix should indicate bry or blk file!')
     
     ofname = fname.replace(inputfiledir,outputfiledir)
     data.to_netcdf(ofname, mode='w', engine='netcdf4',
