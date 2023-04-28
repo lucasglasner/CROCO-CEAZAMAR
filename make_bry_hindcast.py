@@ -20,7 +20,7 @@ import pandas as pd
 from glob import glob
 import xarray as xr
 import shutil
-from utils import add_itolap,cleandirectory
+from utils import add_itolap_bry,cleandirectory
 
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
@@ -37,6 +37,11 @@ MERCATOR_offset = 2
  
 # GLOBAL PARAMETERS
 itolap_mercator = 2  
+itolap_variables   = [
+    'zeta_west','vbar_west','ubar_west','v_west','u_west','temp_west','salt_west',
+    'zeta_north','vbar_north','ubar_north','v_north','u_north','temp_north','salt_north',
+    'zeta_south','vbar_south','ubar_south','v_south','u_south','temp_south','salt_south',
+    'bry_time']
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
 today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazah'
@@ -86,26 +91,28 @@ def main_bry_hindcast():
     print(' Running crocotools make_hindcast_mercator.m, please wait...       ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
-    # make_hindcast_mercator()
+    make_hindcast_mercator()
     print('-------------------------------------------------------------------')
     print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
     print(' Adding overlap days to croco_bry files, please wait...            ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     for date in dates:
-        add_itolap(date=date, itolap=itolap_mercator, timename='bry_time',
-                   inputfiledir=CROCO_files_dir, outputfiledir=SCRATCH_dir,
-                   fprefix=fprefix+'_bry_', freq=6)
+        add_itolap_bry(date, itolap=itolap_mercator,
+                       variables=itolap_variables,
+                       inputfiledir=CROCO_files_dir,
+                       outputfiledir=SCRATCH_dir,
+                       fprefix=fprefix+'_bry_')
     print('\n','')
-    # for date in dates:
-    #     bryname = SCRATCH_dir+fprefix+'_bry_'+date.strftime('%Y%m%d')+'.nc'
-    #     if os.path.isfile(bryname):
-    #         print('Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
-    #         shutil.move(bryname,bryname.replace(SCRATCH_dir,CROCO_files_dir))         
+    for date in dates:
+        bryname = SCRATCH_dir+fprefix+'_bry_'+date.strftime('%Y%m%d')+'.nc'
+        if os.path.isfile(bryname):
+            print('Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
+            shutil.move(bryname,bryname.replace(SCRATCH_dir,CROCO_files_dir))         
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     print('Cleaning scratch directory...                                      ')
-    # cleandirectory(SCRATCH_dir, ['*.nc','*.cdf'])
+    cleandirectory(SCRATCH_dir, ['*.nc','*.cdf'])
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')

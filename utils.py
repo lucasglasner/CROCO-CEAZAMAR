@@ -6,6 +6,7 @@
  # @ Description:
  
  Utility functions for forecast/hindcast preprocessing
+ 
  '''
  
  
@@ -33,66 +34,67 @@ def cleandirectory(directory, filetypes=['*']):
             os.remove(f)
     return
 
-def sliceandconcat_crocoblk(fname, data, itolap, timename, freq, timeshift):
+def find_itolap_datesnfiles(date, inputfiledir, fprefix,
+                            toffset=1):
     """
-    This function grabs the blk data and adds itolaps based on the file in 
-    "fname". Also it is needed to specify the time dimension name
-    the time frequency and a string "timeshift" for indicating if 
-    it will be used a previous or following file (in time)
+    Simple function to find the file names of the current date,
+    previous and following.
     """
-    if timeshift=='previous':
-        print('\t','Previous day file found: ',fname)
-        pdata = xr.open_dataset(fname, decode_times=False, decode_cf=False,
-                                decode_coords=False, decode_timedelta=False,
-                                use_cftime=False)
-        if len(pdata[timename])==24/freq+itolap*2:
-            # If pdata already has overlaps just grab the inner data
-            pdata = pdata.isel({timename:slice(itolap,-itolap)})
-        pdata = pdata.isel({timename:slice(-(itolap+1),-1)})
-        ndata  = xr.concat([pdata,data],timename)
-    elif timeshift=='following':
-        print('\t','Following day file found: ',fname)
-        fdata = xr.open_dataset(fname, decode_times=False, decode_cf=False,
-                              decode_coords=False, decode_timedelta=False,
-                              use_cftime=False)
-        if len(fdata[timename])==24/freq+itolap*2:
-            # If fdata already has overlaps just grab the inner data
-            fdata = fdata.isel({timename:slice(itolap,-itolap)})
-        fdata = fdata.isel({timename:slice(0,itolap)})
-        ndata  = xr.concat([data,fdata],timename)
-    else:
-        raise ValueError
+    # Define previous and following dates
+    previous   = date-pd.Timedelta(days=toffset)
+    following  = date+pd.Timedelta(days=toffset)
+    
+    # Build file names
+    fnamep = inputfiledir+fprefix+previous.strftime('%Y%m%d')+'.nc'
+    fname  = inputfiledir+fprefix+date.strftime('%Y%m%d')+'.nc'
+    fnamef = inputfiledir+fprefix+following.strftime('%Y%m%d')+'.nc'
+    return fnamep, fname, fnamef
+
+def add_previous_itolap(pdata,data,itolap,timename):
+    """
+    Simple function to add previous overlaps based on 
+    previous and current data
+    """
+    pdata = pdata.isel({timename:slice(-(itolap),None)})
+    ndata  = xr.concat([pdata,data],timename)
     return ndata
 
-
-def add_itolap(date, itolap,timename,
-               inputfiledir, outputfiledir,
-               fprefix='croco_blk_', freq=1):
+def add_following_itolap(fdata,data,itolap,timename):
     """
-    This function grabs a croco forcing (blk or bry) file of a given date
+    Simple function to add previous overlaps based on 
+    following and current data
+    """
+    fdata = fdata.isel({timename:slice(None, itolap)})
+    ndata  = xr.concat([data,fdata],timename)
+    return ndata
+
+def add_itolap_blk(date, itolap, variables, inputfiledir, outputfiledir,
+                   fprefix='croco_blk_', timename='bulk_time',
+                   freq=1):
+    """
+    This function grabs a croco blk file of a given date
     and add overlaps based on the previous and following days files. 
     If those files doesnt exist, the function uses the first/last
     record as the overlap value.
     
     Args:
         date (datetime): target date of file to fix
+        variables (list): list of strings with the variables
+        where to apply the overlap.
         itolap (int): number of overlap records.
-        timename (str): dataset time dimension name.
         inputfiledir (str): input file directory
         outputfiledir (str): output file directory
-        fprefix (str, optional): croco file prefix. Defaults to 'croco_blk_'
-        freq (int, optional): data frequency in hours. Defaults to 1.
+        fprefix (str, optional): croco file prefix.
+        Defaults to 'croco_blk_'
+        freq (int, optional): data frequency in hours.
+        Defaults to 1.
+        timename (str, optional): dataset time dimension name.
+        Defaults to 'bulk_time'
     """
-    # Define previous and following dates
-    previous   = date-pd.Timedelta(days=1)
-    following  = date+pd.Timedelta(days=1)
-    
-    # Build file names
-    fnamep = inputfiledir+fprefix+previous.strftime('%Y%m%d')+'.nc'
-    fname  = inputfiledir+fprefix+date.strftime('%Y%m%d')+'.nc'
-    fnamef = inputfiledir+fprefix+following.strftime('%Y%m%d')+'.nc'
-    print('\n','Adding overlap to ',fname)
-    # Load croco bulk associated with given date
+    fnamep, fname, fnamef = find_itolap_datesnfiles(date,
+                                                    inputfiledir,
+                                                    fprefix)
+    # Load croco forcing associated with given dates
     try:
         data    = xr.open_dataset(fname, decode_times=False, decode_cf=False,
                                 decode_coords=False, decode_timedelta=False,
@@ -103,6 +105,13 @@ def add_itolap(date, itolap,timename,
     except Exception as e:
         print('\t',fname,e)
         return
+    keys       = list(data.keys())
+    complement = np.array([k if k not in variables else None for k in keys])
+    complement = complement[complement!=None]
+    complement = data[complement]
+    data       = data[variables]
+    
+    print('\n','Adding overlap to ',fname)
     # Define time frequency in bulk files
     dt      = freq/24
     # Build target previous and following timestamps
@@ -110,51 +119,134 @@ def add_itolap(date, itolap,timename,
                         for n in range(itolap)]))
     ftimes  = sorted(np.array([data[timename][-1].item()+(n+1)*dt
                         for n in range(itolap)]))
-
-    if 'blk' in fprefix:
-        # If previous day data exists open and concat,
-        # else fill backwards with first record
-        if os.path.isfile(fnamep):
-            data = sliceandconcat_crocoblk(fnamep,data, itolap=itolap,
-                                        timename=timename, freq=freq,
-                                        timeshift='previous')
-        else:
-            print('\t','Previous day file not found:',
-                'filling backwards with the first record')
-            ntime = np.concatenate([ptimes,data[timename].values])
-            data  = data.reindex({timename:ntime}).bfill(timename)
-        
-        # If following day data exists open and concat,
-        # else forward fill with latest record
-        if os.path.isfile(fnamef):
-            data = sliceandconcat_crocoblk(fnamef,data, itolap=itolap,
-                                        timename=timename, freq=freq,
-                                        timeshift='following')
-        else:
-            print('\t','Following day file not found:',
-                'filling forwards with the last record')
-            ntime = np.concatenate([data[timename].values, ftimes])
-            data  = data.reindex({timename:ntime}).ffill(timename)
-            
-    elif 'bry' in fprefix:
-        # If previous day data exists open and concat,
-        # else fill backwards with first record
-        if os.path.isfile(fnamep):
-            pass
-        else:
-            pass
-        
-        # If following day data exists open and concat,
-        # else forward fill with latest record
-        if os.path.isfile(fnamef):
-            pass
-        else:
-            pass
-        return
+    # If previous day data exists open and concat,
+    # else fill backwards with first record
+    if os.path.isfile(fnamep):
+        print('\t','Previous day file found')
+        pdata = xr.open_dataset(fnamep, decode_times=False, decode_cf=False,
+                              decode_coords=False, decode_timedelta=False,
+                              use_cftime=False)[variables]
+        data = add_previous_itolap(pdata, data, itolap, timename)
     else:
-        raise ValueError('File prefix should indicate bry or blk file!')
+        print('\t','Previous day file not found:',
+            'filling backwards with the first record')
+        ntime = np.hstack([ptimes,data[timename].values])
+        data  = data.reindex({timename:ntime}).bfill(timename)
+    
+    # If following day data exists open and concat,
+    # else forward fill with latest record
+    if os.path.isfile(fnamef):
+        print('\t','Following day file found')
+        fdata = xr.open_dataset(fnamef, decode_times=False, decode_cf=False,
+                              decode_coords=False, decode_timedelta=False,
+                              use_cftime=False)[variables]
+        data = add_following_itolap(fdata, data, itolap, timename)
+    else:
+        print('\t','Following day file not found:',
+            'filling forwards with the last record')
+        ntime = np.hstack([data[timename].values, ftimes])
+        data  = data.reindex({timename:ntime}).ffill(timename)
     
     ofname = fname.replace(inputfiledir,outputfiledir)
-    data.to_netcdf(ofname, mode='w', engine='netcdf4',
-                   unlimited_dims=[timename])
-    return 
+    xr.merge([complement, data]).to_netcdf(ofname, mode='w', engine='netcdf4',
+                   unlimited_dims=[timename])  
+    return
+
+
+def croco_bry_swapdims(data):
+    """
+    Simple function to remove repeated time variables
+    and change everything to "bry_time"
+    """
+    timevars = ['temp_time','salt_time','zeta_time',
+                'v3d_time','v2d_time']
+    swapdict = {keys:'bry_time' for keys in timevars}
+    data = data.reset_index(list(timevars), drop=True)
+    data = data.rename(swapdict)
+    return data
+
+def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
+                   fprefix='croco_bry_', timename='bry_time',
+                   freq=6):
+    """
+    This function grabs a croco bry file of a given date
+    and add overlaps based on the previous and following days files. 
+    If those files doesnt exist, the function uses the first/last
+    record as the overlap value.
+    
+    Args:
+        date (datetime): target date of file to fix
+        variables (list): list of strings with the variables
+        where to apply the overlap.
+        itolap (int): number of overlap records.
+        inputfiledir (str): input file directory
+        outputfiledir (str): output file directory
+        fprefix (str, optional): croco file prefix.
+        Defaults to 'croco_bry_'
+        freq (int, optional): data frequency in hours.
+        Defaults to 6.
+        timename (str, optional): dataset time dimension name.
+        Defaults to 'bry_time'
+    """
+    fnamep, fname, fnamef = find_itolap_datesnfiles(date, inputfiledir,fprefix)
+    print('\n','Adding overlap to ',fname)
+    # Load croco bry associated with given date
+    try:
+        data = xr.open_dataset(fname, decode_times=False, decode_cf=False,
+                            decode_coords=False, decode_timedelta=False,
+                            use_cftime=False)
+        if len(data[timename])==24/freq+itolap*2:
+            print('\t',fname,' already has overlap times !!')
+            return
+        data = croco_bry_swapdims(data)
+    except Exception as e:
+        print('\t',fname,e)
+        return
+    keys       = list(data.keys())
+    complement = np.array([k if k not in variables else None for k in keys])
+    complement = complement[complement!=None]
+    complement = data[complement]
+    data       = data[variables]
+    
+    # Define time frequency in bulk files
+    dt      = freq/24
+    # Build target previous and following timestamps
+    ptimes  = sorted(np.array([data[timename][0].item()-(n+1)*dt
+                        for n in range(itolap)]))
+    ftimes  = sorted(np.array([data[timename][-1].item()+(n+1)*dt
+                        for n in range(itolap)]))
+    #print(ptimes,data[timename].values,ftimes)
+    # If previous day data exists open and concat,
+    # else fill backwards with first record
+    if os.path.isfile(fnamep):
+        print('\t','Previous day file found')
+        pdata = xr.open_dataset(fnamep, decode_times=False, decode_cf=False,
+                              decode_coords=False, decode_timedelta=False,
+                              use_cftime=False)[variables]
+        pdata = croco_bry_swapdims(pdata).sortby(timename)
+        data  = add_previous_itolap(pdata, data, itolap, timename)
+    else:
+        print('\t','Previous day file not found:',
+            'filling backwards with the first record')
+        ntime = np.hstack([ptimes,data[timename].values])
+        data  = data.reindex({timename:ntime}).sortby(timename).bfill(timename)
+    
+    # If following day data exists open and concat,
+    # else forward fill with latest record
+    if os.path.isfile(fnamef):
+        print('\t','Following day file found')
+        fdata = xr.open_dataset(fnamef, decode_times=False, decode_cf=False,
+                              decode_coords=False, decode_timedelta=False,
+                              use_cftime=False)[variables]
+        fdata = croco_bry_swapdims(fdata).sortby(timename)
+        data  = add_following_itolap(fdata, data, itolap, timename)
+    else:
+        print('\t','Following day file not found:',
+            'filling forwards with the last record')
+        ntime = np.hstack([data[timename].values, ftimes])
+        data  = data.reindex({timename:ntime}).sortby(timename).ffill(timename)
+        
+    ofname = fname.replace(inputfiledir,outputfiledir)
+    xr.merge([complement, data]).to_netcdf(ofname, mode='w', engine='netcdf4',
+                   unlimited_dims=[timename])  
+    return

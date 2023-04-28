@@ -35,7 +35,7 @@ import pandas as pd
 import xarray as xr
 from glob import glob
 from netCDF4 import Dataset as netcdf
-from utils import add_itolap, cleandirectory
+from utils import add_itolap_blk, cleandirectory
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
 # crocotools_param.m static parameters
@@ -54,7 +54,10 @@ today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazah'
 
 # ERA5 PARAMETERS
-itolap_era5     = 6  
+itolap_era5      = 6  
+itolap_variables = [
+    'tair','rhum','prate','wspd','radlw','radlw_in','uwnd','vwnd','bulk_time','radsw'
+] 
 pathERA5raw = DATADIR+'/ERA5/'
 dates  = pd.date_range(
     (today-pd.Timedelta(days=ERA5_delay+ERA5_offset)).strftime('%F'),
@@ -246,9 +249,11 @@ def main_blk_hindcast():
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     for date in dates:
-        add_itolap(date=date, itolap=itolap_era5, timename='bulk_time',
-                   inputfiledir=CROCO_files_dir, outputfiledir=SCRATCH_dir,
-                   fprefix=fprefix+'_blk_', freq=1)
+        add_itolap_blk(date, itolap=itolap_era5,
+                       variables=itolap_variables,
+                       inputfiledir=CROCO_files_dir,
+                       outputfiledir=SCRATCH_dir,
+                       fprefix=fprefix+'_blk_')
     print('\n','')
     for date in dates:
         blkname = SCRATCH_dir+fprefix+'_blk_'+date.strftime('%Y%m%d')+'.nc'
