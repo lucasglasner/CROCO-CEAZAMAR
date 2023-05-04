@@ -126,6 +126,8 @@ def add_itolap_blk(date, itolap, variables, inputfiledir, outputfiledir,
         pdata = xr.open_dataset(fnamep, decode_times=False, decode_cf=False,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)[variables]
+        if len(pdata[timename])==24/freq+itolap*2:
+            pdata = pdata.isel({timename:slice(itolap,-itolap)})
         data = add_previous_itolap(pdata, data, itolap, timename)
     else:
         print('\t','Previous day file not found:',
@@ -140,6 +142,8 @@ def add_itolap_blk(date, itolap, variables, inputfiledir, outputfiledir,
         fdata = xr.open_dataset(fnamef, decode_times=False, decode_cf=False,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)[variables]
+        if len(fdata[timename])==24/freq+itolap*2:
+            fdata = fdata.isel({timename:slice(itolap,-itolap)})
         data = add_following_itolap(fdata, data, itolap, timename)
     else:
         print('\t','Following day file not found:',
@@ -158,11 +162,14 @@ def croco_bry_swapdims(data):
     Simple function to remove repeated time variables
     and change everything to "bry_time"
     """
-    timevars = ['temp_time','salt_time','zeta_time',
-                'v3d_time','v2d_time']
-    swapdict = {keys:'bry_time' for keys in timevars}
-    data = data.reset_index(list(timevars), drop=True)
-    data = data.rename(swapdict)
+    try:
+        timevars = ['temp_time','salt_time','zeta_time',
+                    'v3d_time','v2d_time']
+        swapdict = {keys:'bry_time' for keys in timevars}
+        data = data.reset_index(list(timevars), drop=True)
+        data = data.rename(swapdict)
+    except:
+        pass
     return data
 
 def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
@@ -223,6 +230,8 @@ def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
         pdata = xr.open_dataset(fnamep, decode_times=False, decode_cf=False,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)[variables]
+        if len(pdata[timename])==24/freq+itolap*2:
+            pdata = pdata.isel({timename:slice(itolap,-itolap)})
         pdata = croco_bry_swapdims(pdata).sortby(timename)
         data  = add_previous_itolap(pdata, data, itolap, timename)
     else:
@@ -239,6 +248,8 @@ def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
                               decode_coords=False, decode_timedelta=False,
                               use_cftime=False)[variables]
         fdata = croco_bry_swapdims(fdata).sortby(timename)
+        if len(fdata[timename])==24/freq+itolap*2:
+            fdata = fdata.isel({timename:slice(itolap,-itolap)})
         data  = add_following_itolap(fdata, data, itolap, timename)
     else:
         print('\t','Following day file not found:',

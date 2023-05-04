@@ -1,3 +1,4 @@
 **/*.nc
 **/*.cdf
+__pycache__
 make_forecast.log

@@ -32,7 +32,7 @@ CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 SCRATCH_dir     = RUN_dir+'/SCRATCH/'
 Yorig           = 1950       
 MERCATOR_delay  = 6
-MERCATOR_offset = 2
+MERCATOR_offset = 1
  
  
 # GLOBAL PARAMETERS
@@ -51,8 +51,6 @@ dates  = pd.date_range(
     )
 
 os.chdir(maindir)
-
-
 # --------------------------------- FUNCTIONS -------------------------------- #
 def make_hindcast_mercator(matlabexec='matlab -nodisplay -nosplash -nodesktop',
             execdirectory=RUN_dir):
