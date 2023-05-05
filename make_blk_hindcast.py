@@ -46,7 +46,7 @@ CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 SCRATCH_dir      = RUN_dir+'/SCRATCH/'
 Yorig           = 1950              
 ERA5_delay      = 6          
-ERA5_offset     = 1      
+ERA5_offset     = 1        
 
 # GLOBAL PARAMETERS
 maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
@@ -263,7 +263,7 @@ def main_blk_hindcast():
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     print('Cleaning scratch directory...                                      ')
-    cleandirectory(SCRATCH_dir, ['*.nc'])
+    # cleandirectory(SCRATCH_dir, ['*.nc','*.cdf'])
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')
@@ -271,4 +271,9 @@ def main_blk_hindcast():
 
 # ------------------------------- RUN ROUTINES ------------------------------- #
 if __name__=='__main__':
-    main_blk_hindcast()
+    todayfile = CROCO_files_dir+fprefix+'_blk_'
+    todayfile = todayfile+dates[-1].strftime('%F').replace('-','')+'.nc'
+    if os.path.isfile(todayfile):
+        print('Today file:',todayfile,'already exists!')
+    else:
+        main_blk_hindcast()

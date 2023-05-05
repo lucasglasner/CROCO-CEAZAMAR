@@ -22,6 +22,7 @@ now=$(date +%F\ %H:%M:%S -u)
 echo $now  Creating forecast atmospheric boundary conditions...
 # ./make_blk_forecast.py
 printf "\n\n"
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 echo "Done"
 echo "Elapsed time: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
 exit

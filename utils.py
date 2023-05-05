@@ -100,7 +100,7 @@ def add_itolap_blk(date, itolap, variables, inputfiledir, outputfiledir,
                                 decode_coords=False, decode_timedelta=False,
                                 use_cftime=False)
         if len(data[timename])==24/freq+itolap*2:
-            print('\t',fname,' already has overlap times !!')
+            print(fname,' already has overlap times !!')
             return
     except Exception as e:
         print('\t',fname,e)
@@ -203,7 +203,7 @@ def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
                             decode_coords=False, decode_timedelta=False,
                             use_cftime=False)
         if len(data[timename])==24/freq+itolap*2:
-            print('\t',fname,' already has overlap times !!')
+            print(fname,' already has overlap times !!')
             return
         data = croco_bry_swapdims(data)
     except Exception as e:

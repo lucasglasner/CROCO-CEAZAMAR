@@ -117,4 +117,10 @@ def main_bry_hindcast():
     return
 
 if __name__=='__main__':
-    main_bry_hindcast()
+    todayfile = CROCO_files_dir+fprefix+'_bry_'
+    todayfile = todayfile+dates[-1].strftime('%F').replace('-','')+'.nc'
+    if os.path.isfile(todayfile):
+        print('Today file:',todayfile,'already exists!')
+    else:
+        main_bry_hindcast()
+
