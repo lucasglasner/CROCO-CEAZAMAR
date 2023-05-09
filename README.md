@@ -9,7 +9,7 @@ the forecast simulation maintains the ocean forcing data but changes the atmosph
 the data flow of the hindcast and forecast simulation:
 
 ```
-<<<<<< HINDCAST RUN >>>>>>>                  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FORECAST RUN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>                                       
+<<<<<< HINDCAST RUN >>>>>>>                  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FORECAST RUN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                                               <<<<<<<< HINDCAST* >>>>>>>  < NOWCAST >   <<<<<<<<<<<<<<<<<<<<< FORECAST >>>>>>>>>>>>>>>>>
 <--------- ERA5 ---------- | -------------- | ------ GFS ANALYSIS ----- | ----------- | ------ GFS FORECAST ----- | -------------------- |
 <------------------------- |   6 days ago   | ------------------------- | --- NOW --- | ------------------------- | --- 10 lead days --- |
