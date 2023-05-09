@@ -274,7 +274,7 @@
 !---------------------------------
 !
 */
-# define DIAGNOSTICS_TS
+# undef DIAGNOSTICS_TS
 # undef DIAGNOSTICS_UV
 # ifdef DIAGNOSTICS_TS
 #  undef  DIAGNOSTICS_TS_ADV
