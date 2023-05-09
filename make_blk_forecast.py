@@ -45,7 +45,7 @@ os.chdir(maindir)
 
 
 # --------------------------------- FUNCTIONS -------------------------------- #
-def make_forecast_GFS(matlabexec='matlab -nodisplay -nosplash -nodesktop',
+def make_forecast_GFS(matlabexec='/opt/MATLAB/R2017a/bin/matlab -nodisplay -singleCompThread',
             execdirectory=RUN_dir):
     """
     This function is responsable of running matlab crocotools routine

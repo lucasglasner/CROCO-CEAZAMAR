@@ -194,7 +194,7 @@ def ERA5_convert(fname, date, outdir=SCRATCH_dir, Yorig=Yorig):
     return 
 
 
-def make_hindcast_ERA5(matlabexec='matlab -nodisplay -nosplash -nodesktop',
+def make_hindcast_ERA5(matlabexec='/opt/MATLAB/R2017a/bin/matlab -nodisplay -singleCompThread',
                        execdirectory=RUN_dir):
     """
     This function is responsable of running matlab crocotools routine

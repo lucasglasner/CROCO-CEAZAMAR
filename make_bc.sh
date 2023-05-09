@@ -1,6 +1,11 @@
 #!/usr/bin/bash
+#SBATCH -p part1
+#SBATCH -J make_bc
+#SBATCH -N 1
+#SBATCH --output=make_bc.log
+#
 # This shell script purpose is to run all the python preprocessing scripts for creating the bulk and bry files of the hindcast and forecast run.
-
+#
 maindir='/ceaza/lucas/CROCO-CEAZAMAR/'
 cd $maindir
 

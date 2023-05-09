@@ -52,7 +52,7 @@ dates  = pd.date_range(
 
 os.chdir(maindir)
 # --------------------------------- FUNCTIONS -------------------------------- #
-def make_hindcast_mercator(matlabexec='matlab -nodisplay -nosplash -nodesktop',
+def make_hindcast_mercator(matlabexec='/opt/MATLAB/R2017a/bin/matlab -nodisplay -singleCompThread',
             execdirectory=RUN_dir):
     """
     This function is responsable of running adapted crocotools routine
