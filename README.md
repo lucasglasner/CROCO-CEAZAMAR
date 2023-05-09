@@ -20,6 +20,6 @@ the data flow of the hindcast and forecast simulation:
 
 In simple words, the idea is to run a dynamical downscaling of ERA5 and Mercator to build the initial conditions for a forecast run. Since ERA5 has an approx. 6 days delay
 this downscaling is run every day giving an unbiased restart file that is 6 days apart from real time. The forecast run consist of a small hindcast that takes account
-this delay and uses the GFS analysis for filling the missing atmospheric forcing, that allows to perform a croco simulation to the current date. The second part of the forecast 
-run is just a free run of croco forcing with the GFS forecast and the Mercator forecast. The idea is to postprocess the forecast run for operational uses because it will save
-hourly 3D fields everyday from 6 days past to 10 days to the future. The hindcast simulation with save everyday a single daily avg output that can be used for research purposes.  
+this delay and uses the GFS analysis to fill the missing atmospheric forcing, that allows the stretching of the simulation to the present time. The second part of the forecast 
+run is just a free run, forcing with GFS and Mercator global forecasts. The idea is to postprocess the forecast run for operational uses because it will save everyday
+hourly 3D fields from 6 days past to 10 days to the future. The hindcast simulation will everyday store a single daily avg output that can be used for research and improvement purposes.  
