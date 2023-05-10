@@ -2,7 +2,7 @@
 #SBATCH -p part1
 #SBATCH -J spinup
 #SBATCH -n 60
-#SBATCH --output=spinup.log
+#SBATCH --output=run_crocodaily.log
 
 
 source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
@@ -17,11 +17,11 @@ SIMNAME='crococeazah'                                                           
 MAINDIR=/ceaza/lucas/CROCO-CEAZAMAR                                             # Directory of this script
 TIMESTEP=150                                                                    # Desired time step in seconds
 NUMTIMES=$(expr 86400 / $TIMESTEP)                                              # Number of timesteps to run (1 day)
-TARGETYEAR=2022                                                                 # Year to repeat as spin up
-SPINUPYEARS=2                                                                   # Number of spin up years
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
+INIDATE='2020-01-01'
+ENDDATE='2021-12-31'
 SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/spinup                                    # Directory where model is run
 OUTPUTDIR=${MAINDIR}/HINDCAST/OUTPUT                                            # Directory where model outputs are saved
 CROCOFILESDIR=${MAINDIR}/HINDCAST/CROCO_FILES                                   # Directory where croco forcing are stored
@@ -29,7 +29,7 @@ CROCOEXEC=${MAINDIR}/HINDCAST/croco                                             
 
 CROCOIN=${MAINDIR}/HINDCAST/${SIMNAME}.in                                       # croco.in textfile path
 CROCOGRID=${CROCOFILESDIR}/${SIMNAME}_grd.nc                                    # path to model grid                                
-NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                # path to nccopy binary (netcdf library)
+NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                # path to nccopy binary (netcdf package)
 
 #################################################################################################################################
 #                                                    END OF USER SELECTIONS                                                     #
@@ -37,21 +37,26 @@ NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                
 printf -- '#%.0s' {1..160}
 printf "\n"
 printf -- ' %.0s' {1..60}
-echo RUNNING CROCO DAILY SPIN UP
+echo RUNNING CROCO MODEL FROM DAILY FORCINGS
 printf -- '#%.0s' {1..160}
 printf "\n\n"
 # Copy model executable to run directory
 if test -f "$CROCOEXEC"; then
     cp $CROCOEXEC $SCRATCHDIR
 else
-    echo croco executable not found !! Dont forget to compile croco!!
+    echo croco executable not found !! Dont forget to compile croco first !!
     exit
 fi
 
+
+# Getting number of days between initial and final date
+NDAYS=$(echo \($(date -d "$ENDDATE" +%s) - $(date -d "$INIDATE" +%s)\) / 86400 | bc) 
+INIYEAR=$(echo $INIDATE | cut -c -4)
+# MODEL PREFFIX
 MODEL=${SCRATCHDIR}/${SIMNAME}
-for i in {0..364}; do
-    echo Running $(date -d "${TARGETYEAR}-01-01 +$i days" +%F)...
-    TIME=$(date -d "${TARGETYEAR}-01-01 +$i days" +%Y%m%d)
+for i in $(seq 0 $NDAYS); do
+    echo Running $(date -d "${INIDATE} +$i days" +%F)...
+    TIME=$(date -d "${INIDATE} +$i days" +%Y%m%d)
     # Getting forcing file names
     CROCOBLK=${CROCOFILESDIR}/${SIMNAME}_blk_${TIME}.nc
     CROCOBRY=${CROCOFILESDIR}/${SIMNAME}_bry_${TIME}.nc
@@ -59,7 +64,7 @@ for i in {0..364}; do
     if [ $i -eq "0" ]; then
         CROCOINI=${CROCOFILESDIR}/${SIMNAME}_ini_${TIME}.nc
     else
-        CROCOINI=${MODEL}_rst_$(date -d "${TARGETYEAR}-01-01 +$(expr $i - 1) days" +%Y%m%d).nc
+        CROCOINI=${MODEL}_rst_$(date -d "${INIDATE} +$(expr $i - 1) days" +%Y%m%d).nc
     fi
 
     # Copy model input files to run directory
@@ -76,7 +81,6 @@ for i in {0..364}; do
     echo Copy .in file: cp $CROCOIN ${MODEL}_${TIME}.in
     cp $CROCOIN ${MODEL}_${TIME}.in
     
-
     # Edit croco.in file with desired parameters (timestep and number of runtimes)
     echo "Edit ${MODEL}_${TIME}.in: TIMESTEP = ${TIMESTEP}s ; NUMTIMES = ${NUMTIMES}"
     sed -i "s/%NUMTIMES%/${NUMTIMES}/g" ${MODEL}_${TIME}.in
@@ -89,6 +93,7 @@ for i in {0..364}; do
     ${RUNCMD}./croco ${SIMNAME}_${TIME}.in > ${SIMNAME}_${TIME}.out
     cd $MAINDIR
     printf "\n"
+
     # Test if the run has finised properly
     if test -f ${MODEL}_${TIME}.out; then
         echo "Test ${MODEL}_${TIME}.out"
@@ -105,7 +110,7 @@ for i in {0..364}; do
     echo Saving outputs...
     mv -f ${MODEL}_rst.nc ${MODEL}_rst_${TIME}.nc
     mv -f ${MODEL}_avg.nc ${OUTPUTDIR}/${SIMNAME}_avg_${TIME}.nc
-    # mv -f ${MODEL}_his.nc ${OUTPUTDIR}/${SIMNAME}_his_${TIME}.nc
+    mv -f ${MODEL}_his.nc ${OUTPUTDIR}/${SIMNAME}_his_${TIME}.nc
 
     # Clean netcdf from scratch directory
     rm -f ${MODEL}_rst.nc
@@ -120,7 +125,3 @@ for i in {0..364}; do
     printf "\n"
 done
 exit
-
-#ncap2 -s 'scrum_time=scrum_time-86400' crococeazah_rst_20220101.nc tmp.nc
-#ncap2 -s 'time=time-86400' tmp.nc tmp2.nc
-#ncks -C -O -x -v time_step tmp2.nc crococeazah_ini_20220101.nc && rm tmp.nc tmp2.nc 

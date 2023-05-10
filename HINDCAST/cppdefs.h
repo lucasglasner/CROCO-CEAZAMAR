@@ -173,7 +173,7 @@
 #  define BULK_EP
 #  define BULK_SMFLUX
 #  undef  SST_SKIN
-#  define  ANA_DIURNAL_SW
+#  undef  ANA_DIURNAL_SW
 #  undef  ONLINE
 #  ifdef ONLINE 
 #   undef  AROME
