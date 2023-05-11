@@ -15,13 +15,13 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}::${NETCDF}/lib
 #################################################################################################################################
 SIMNAME='crococeazah'                                                           # Simulation prefix name (e.g croco)
 MAINDIR=/ceaza/lucas/CROCO-CEAZAMAR                                             # Directory of this script
-TIMESTEP=150                                                                    # Desired time step in seconds
+TIMESTEP=120                                                                    # Desired time step in seconds
 NUMTIMES=$(expr 86400 / $TIMESTEP)                                              # Number of timesteps to run (1 day)
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
-INIDATE='2020-01-01'
-ENDDATE='2021-12-31'
+INIDATE='2020-01-02'
+ENDDATE='2020-12-31'
 SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/spinup                                    # Directory where model is run
 OUTPUTDIR=${MAINDIR}/HINDCAST/OUTPUT                                            # Directory where model outputs are saved
 CROCOFILESDIR=${MAINDIR}/HINDCAST/CROCO_FILES                                   # Directory where croco forcing are stored
@@ -30,7 +30,7 @@ CROCOEXEC=${MAINDIR}/HINDCAST/croco                                             
 CROCOIN=${MAINDIR}/HINDCAST/${SIMNAME}.in                                       # croco.in textfile path
 CROCOGRID=${CROCOFILESDIR}/${SIMNAME}_grd.nc                                    # path to model grid                                
 NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                # path to nccopy binary (netcdf package)
-
+RESTART=1                                                                       # 0 - 1 for use restart or ini file
 #################################################################################################################################
 #                                                    END OF USER SELECTIONS                                                     #
 #################################################################################################################################
@@ -61,7 +61,7 @@ for i in $(seq 0 $NDAYS); do
     CROCOBLK=${CROCOFILESDIR}/${SIMNAME}_blk_${TIME}.nc
     CROCOBRY=${CROCOFILESDIR}/${SIMNAME}_bry_${TIME}.nc
     CROCOFRC=${CROCOFILESDIR}/${SIMNAME}_frc_${TIME}.nc
-    if [ $i -eq "0" ]; then
+    if [ $RESTART -eq "0" ]; then
         CROCOINI=${CROCOFILESDIR}/${SIMNAME}_ini_${TIME}.nc
     else
         CROCOINI=${MODEL}_rst_$(date -d "${INIDATE} +$(expr $i - 1) days" +%Y%m%d).nc

@@ -21,10 +21,10 @@ restart:          NRST, NRPFRST / filename
                   %NUMTIMES%   -1
                           crococeazah_rst.nc
 history: LDEFHIS, NWRT, NRPFHIS / filename 
-            F      576       0
+            F      720       0
                           crococeazah_his.nc
 averages: NTSAVG, NAVG, NRPFAVG / filename
-            0      576       0
+            0      720       0
                           crococeazah_avg.nc
 
 primary_history_fields: zeta UBAR VBAR  U  V   wrtT(1:NT)

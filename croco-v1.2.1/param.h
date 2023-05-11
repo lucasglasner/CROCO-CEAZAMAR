@@ -178,10 +178,6 @@
       parameter (LLm0=83,   MMm0=85,   N=32)   ! BENGUELA_HR
 # elif defined  BENGUELA_VHR
       parameter (LLm0=167,  MMm0=170,  N=32)   ! BENGUELA_VHR
-# elif defined TESTSIM
-      parameter (LLm0=323,  MMm0=292,  N=50) ! <------------------- NCCHILEv2 Chica de pruebas <- LUCAS
-# elif defined CROCOCEAZAH
-      parameter (LLm0=150,  MMm0=250,  N=50) ! <------------------- Dominio pronóstico ceaza
 # else
       parameter (LLm0=xx, MMm0=xx, N=xx)  ! YOUR REGIONAL CONFIG
 # endif
@@ -222,8 +218,8 @@
       integer NSUB_X, NSUB_E, NPP
 #ifdef MPI
       integer NP_XI, NP_ETA, NNODES
-      parameter (NP_XI=3,  NP_ETA=20,  NNODES=NP_XI*NP_ETA)
-      parameter (NPP=60)
+      parameter (NP_XI=1,  NP_ETA=4,  NNODES=NP_XI*NP_ETA)
+      parameter (NPP=1)
       parameter (NSUB_X=1, NSUB_E=1)
 #elif defined OPENMP
       parameter (NPP=4)
@@ -260,7 +256,7 @@
 # if defined IGW
       parameter (Ntides=1)
 # else
-      parameter (Ntides=10)
+      parameter (Ntides=8)
 # endif
 #endif
 !
