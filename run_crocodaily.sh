@@ -20,8 +20,8 @@ NUMTIMES=$(expr 86400 / $TIMESTEP)                                              
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
-INIDATE='2020-01-02'
-ENDDATE='2020-12-31'
+INIDATE='2020-12-31'
+ENDDATE='2021-12-31'
 SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/spinup                                    # Directory where model is run
 OUTPUTDIR=${MAINDIR}/HINDCAST/OUTPUT                                            # Directory where model outputs are saved
 CROCOFILESDIR=${MAINDIR}/HINDCAST/CROCO_FILES                                   # Directory where croco forcing are stored
