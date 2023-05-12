@@ -20,7 +20,7 @@ NUMTIMES=$(expr 86400 / $TIMESTEP)                                              
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
-INIDATE='2020-12-31'
+INIDATE='2021-04-27'
 ENDDATE='2021-12-31'
 SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/spinup                                    # Directory where model is run
 OUTPUTDIR=${MAINDIR}/HINDCAST/OUTPUT                                            # Directory where model outputs are saved

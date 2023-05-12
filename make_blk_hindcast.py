@@ -262,8 +262,6 @@ def main_blk_hindcast():
             shutil.move(blkname,blkname.replace(SCRATCH_dir,CROCO_files_dir))         
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
-    print('Cleaning scratch directory...                                      ')
-    # cleandirectory(SCRATCH_dir, ['*.nc','*.cdf'])
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)
     print('All good','                                                        ')

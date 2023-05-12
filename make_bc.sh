@@ -23,10 +23,22 @@ echo $now Creating hindcast oceanic boundary conditions...
 ./make_bry_hindcast.py
 printf "\n\n"
 echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+echo 'Cleaning hindcast scratch directory...'
+rm -rf $maindir/HINDCAST/SCRATCH/*
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 now=$(date +%F\ %H:%M:%S -u)
 echo $now  Creating forecast atmospheric boundary conditions...
-# ./make_blk_forecast.py
+./make_blk_forecast.py
 printf "\n\n"
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+now=$(date +%F\ %H:%M:%S -u)
+echo $now Creating forecast oceanic boundary conditions...
+./make_bry_forecast.py
+printf "\n\n"
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+echo 'Cleaning forecast scratch directory...'
+rm -rf $maindir/FORECAST/SCRATCH/*
+
 echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 echo "Done"
 echo "Elapsed time: $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"

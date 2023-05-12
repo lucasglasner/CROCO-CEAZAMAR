@@ -84,11 +84,7 @@ def main_blk_forecast():
     print(' Running crocotools make_GFS.m, please wait...                     ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
-    blkname = CROCO_files_dir+fprefix+'_blk_'+today.strftime('%Y%m%d')+'.nc'
-    if os.path.isfile(blkname):
-            print('\t',blkname,' already exists!')
-    else:
-        make_forecast_GFS()
+    make_forecast_GFS()
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
@@ -97,4 +93,8 @@ def main_blk_forecast():
     return
 # ------------------------------- RUN ROUTINES ------------------------------- #
 if __name__=='__main__':
-    main_blk_forecast()
+    todayfile = CROCO_files_dir+fprefix+'_blk_'+today.strftime('%Y%m%d')+'.nc'
+    if os.path.isfile(todayfile):
+        print('Today file:',todayfile,'already exists!')
+    else:
+        main_blk_forecast()

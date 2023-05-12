@@ -237,7 +237,7 @@ zref = -1000;
 %  (used in make_clim, make_biol, make_bry,
 %   make_OGCM.m and make_OGCM_frcst.m)
 %
-makeini    = 1;   % initial data
+makeini    = 0;   % initial data
 makeclim   = 0;   % climatological data (for boundaries and nudging layers)
 makebry    = 1;   % lateral boundary data
 makenpzd   = 0;   % initial and boundary data for NChlPZD and N2ChlPZD2 models
@@ -423,9 +423,9 @@ OGCM        = 'mercator';        % Select OGCM: SODA, ECCO, mercator
 %
 OGCM_dir    = [FORC_DATA_DIR,OGCM,'_',CROCO_config,'/'];  % OGCM data dir. [croco format]
 %
-bry_prefix  = [CROCO_files_dir,'crococeazaf_bry_',OGCM,'_'];    % generic boundary file name
-clm_prefix  = [CROCO_files_dir,'crococeazaf_clm_',OGCM,'_'];    % generic climatology file name
-ini_prefix  = [CROCO_files_dir,'crococeazaf_ini_',OGCM,'_'];    % generic initial file name
+bry_prefix  = [CROCO_files_dir,'crococeazah_bry_'];    % generic boundary file name
+clm_prefix  = [CROCO_files_dir,'crococeazah_clm_'];    % generic climatology file name
+ini_prefix  = [CROCO_files_dir,'crococeazah_ini_'];    % generic initial file name
 OGCM_prefix = [OGCM,'_'];                                 % generic OGCM file name 
 
 if strcmp(OGCM,'mercator')
@@ -471,8 +471,8 @@ FRCST_dir = [FORC_DATA_DIR];  % path to local OGCM data directory
 % Number of FORECAST/forecast days
 %
 if strcmp(OGCM,'ECCO')
-  hdays=1;
-  fdays=0;
+  hdays=6;
+  fdays=10;
 elseif strcmp(OGCM,'mercator')
   hdays=6;
   fdays=10;
@@ -496,6 +496,7 @@ add_tides_fcst = 1;       % 1: add tides
 %  Copernicus web site (Mercator, UK Met Office ...)
 %
 if strcmp(OGCM,'mercator')
+  SCRATCH_dir     = [RUN_dir,'/SCRATCH/'];
   user     = 'XXX';
   password = 'XXX';
 
