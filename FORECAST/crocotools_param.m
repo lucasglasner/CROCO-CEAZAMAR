@@ -423,9 +423,9 @@ OGCM        = 'mercator';        % Select OGCM: SODA, ECCO, mercator
 %
 OGCM_dir    = [FORC_DATA_DIR,OGCM,'_',CROCO_config,'/'];  % OGCM data dir. [croco format]
 %
-bry_prefix  = [CROCO_files_dir,'crococeazah_bry_'];    % generic boundary file name
-clm_prefix  = [CROCO_files_dir,'crococeazah_clm_'];    % generic climatology file name
-ini_prefix  = [CROCO_files_dir,'crococeazah_ini_'];    % generic initial file name
+bry_prefix  = [CROCO_files_dir,'crococeazaf_bry_'];    % generic boundary file name
+clm_prefix  = [CROCO_files_dir,'crococeazaf_clm_'];    % generic climatology file name
+ini_prefix  = [CROCO_files_dir,'crococeazaf_ini_'];    % generic initial file name
 OGCM_prefix = [OGCM,'_'];                                 % generic OGCM file name 
 
 if strcmp(OGCM,'mercator')

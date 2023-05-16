@@ -32,7 +32,7 @@ CROCO_files_dir = '/ceaza/lucas/CROCO-CEAZAMAR/HINDCAST/CROCO_FILES/'
 SCRATCH_dir     = RUN_dir+'/SCRATCH/'
 Yorig           = 1950       
 MERCATOR_delay  = 6
-MERCATOR_offset = 1
+MERCATOR_offset = 2
  
  
 # GLOBAL PARAMETERS
@@ -121,4 +121,5 @@ if __name__=='__main__':
         print('Today file:',todayfile,'already exists!')
     else:
         main_bry_hindcast()
+    main_bry_hindcast()
 

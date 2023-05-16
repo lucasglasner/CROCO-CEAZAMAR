@@ -53,7 +53,7 @@
 !
 */
                       /* Configuration Name */
-# define CROCOCEAZAH
+# define CROCOCEAZA
                       /* Parallelization */
 # undef  OPENMP
 # define  MPI
@@ -133,8 +133,8 @@
 # undef  UV_VADV_WENO5
 # undef  UV_VADV_TVD
                       /* Lateral Tracer Advection (default UP3) */
-# undef  TS_HADV_UP3
-# define  TS_HADV_RSUP3
+# define  TS_HADV_UP3
+# undef  TS_HADV_RSUP3
 # undef  TS_HADV_UP5
 # undef TS_HADV_WENO5
                       /* Lateral Explicit Tracer Mixing */
@@ -150,7 +150,6 @@
                       /* Semi-implicit Vertical Tracer/Mom Advection */
 # undef  VADV_ADAPT_IMP
                       /* Bottom friction in fast 3D step */
-# define LIMIT_BSTRESS
 # undef  BSTRESS_FAST
                       /* Vertical Mixing */
 # undef  BODYFORCE
@@ -163,7 +162,7 @@
 #  define LMD_RIMIX
 #  define LMD_CONVEC
 #  undef  LMD_DDMIX
-#  define  LMD_NONLOCAL
+#  undef  LMD_NONLOCAL
 #  undef  MLCONVEC
 # endif
                       /* Surface Forcing */
@@ -275,7 +274,7 @@
 !---------------------------------
 !
 */
-# undef DIAGNOSTICS_TS
+# define DIAGNOSTICS_TS
 # undef DIAGNOSTICS_UV
 # ifdef DIAGNOSTICS_TS
 #  undef  DIAGNOSTICS_TS_ADV
