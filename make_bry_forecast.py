@@ -18,6 +18,8 @@ import datetime
 import xarray as xr
 import numpy as np
 import pandas as pd
+import shutil
+from utils import add_itolap_bry
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
 # crocotools_param.m static parameters
@@ -34,6 +36,12 @@ maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
 SCRATCH_dir     = RUN_dir+'/SCRATCH/'
 today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazaf'
+itolap_mercator = 2  
+itolap_variables   = [
+    'zeta_west','vbar_west','ubar_west','v_west','u_west','temp_west','salt_west',
+    'zeta_north','vbar_north','ubar_north','v_north','u_north','temp_north','salt_north',
+    'zeta_south','vbar_south','ubar_south','v_south','u_south','temp_south','salt_south',
+    'bry_time']
 
 dates  = pd.date_range(
     (today-pd.Timedelta(days=hdays)).strftime('%F'),
@@ -169,6 +177,22 @@ def main_bry_forecast():
     print('-------------------------------------------------------------------')
     make_forecast_mercator()
     print('-------------------------------------------------------------------')
+    print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
+    print(' Adding overlap days to croco_bry files, please wait...            ')
+    print(' Dates =',dates,'                                                  ')
+    print('-------------------------------------------------------------------')
+
+    add_itolap_bry(today, itolap=itolap_mercator,
+                variables=itolap_variables,
+                inputfiledir=CROCO_files_dir,
+                outputfiledir=SCRATCH_dir,
+                fprefix=fprefix+'_bry_')
+
+    bryname = SCRATCH_dir+fprefix+'_bry_'+today.strftime('%Y%m%d')+'.nc'
+    if os.path.isfile(bryname):
+        print('Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
+        shutil.move(bryname,bryname.replace(SCRATCH_dir,CROCO_files_dir))     
+    print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()
     print('Elapsed time:',endtime-starttime)
@@ -181,6 +205,7 @@ if __name__=='__main__':
     if os.path.isfile(todayfile):
         print('Today file:',todayfile,'already exists!')
     else:
-        main_bry_forecast()
+        pass
+    main_bry_forecast()
 
 

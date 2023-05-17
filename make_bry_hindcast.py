@@ -20,7 +20,7 @@ import pandas as pd
 from glob import glob
 import xarray as xr
 import shutil
-from utils import add_itolap_bry,cleandirectory
+from utils import add_itolap_bry, cleandirectory
 
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
@@ -121,5 +121,4 @@ if __name__=='__main__':
         print('Today file:',todayfile,'already exists!')
     else:
         main_bry_hindcast()
-    main_bry_hindcast()
 
