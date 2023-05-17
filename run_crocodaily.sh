@@ -20,7 +20,7 @@ NUMTIMES=$(expr 86400 / $TIMESTEP)                                              
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
-INIDATE='2020-01-01'
+INIDATE='2020-01-02'
 ENDDATE='2021-12-31'
 SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/SPINUP   
                                   # Directory where model is run
@@ -31,7 +31,7 @@ CROCOEXEC=${MAINDIR}/HINDCAST/croco                                             
 CROCOIN=${MAINDIR}/HINDCAST/${SIMNAME}.in                                       # croco.in textfile path
 CROCOGRID=${CROCOFILESDIR}/${SIMNAME}_grd.nc                                    # path to model grid                                
 NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                # path to nccopy binary (netcdf package)
-RESTART=0                                                                       # 0 - 1 for use restart or ini file
+RESTART=1                                                                       # 0 - 1 for use restart or ini file
 #################################################################################################################################
 #                                                    END OF USER SELECTIONS                                                     #
 #################################################################################################################################
@@ -62,7 +62,7 @@ for i in $(seq 0 $NDAYS); do
     CROCOBLK=${CROCOFILESDIR}/${SIMNAME}_blk_${TIME}.nc
     CROCOBRY=${CROCOFILESDIR}/${SIMNAME}_bry_${TIME}.nc
     CROCOFRC=${CROCOFILESDIR}/${SIMNAME}_frc_${TIME}.nc
-    if [ $RESTART -eq "0" ]; then
+    if [ $RESTART -eq "0" ] && [ $i -eq "0" ]; then
         CROCOINI=${CROCOFILESDIR}/${SIMNAME}_ini_${TIME}.nc
     else
         CROCOINI=${MODEL}_rst_$(date -d "${INIDATE} +$(expr $i - 1) days" +%Y%m%d).nc

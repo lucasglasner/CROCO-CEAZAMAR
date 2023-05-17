@@ -152,6 +152,7 @@ if makeclim==1 | makebry==1
   end
 end
 
+
 %---------------------------------------------------------------
 % Perform interpolations for all selected records
 %---------------------------------------------------------------
@@ -173,5 +174,25 @@ if ~isempty(nc_bry)
 end
 close(nc); 
 disp(' ')
+
+
+%---------------------------------------------------------------
+% Initial file 
+%---------------------------------------------------------------
+if makeini==1
+  ininame=[ini_prefix,datestr(now,'yyyymmdd'),nc_suffix];
+  disp(['Create an initial file for ',datestr(now,'yyyy-mm-dd');])
+  create_inifile(ininame,grdname,CROCO_title,...
+                 theta_s,theta_b,hc,N,...
+                 time(1),'clobber',vtransform); % starts at 00:00
+  nc_ini=netcdf(ininame,'write');
+ 
+  interp_OGCM_frcst(mercator_name,Roa,interp_method,...
+              lonU,latU,lonV,latV,lonT,latT,Z,1,...
+              nc_ini,[],lon,lat,angle,h,pm,pn,rmask,...
+              1,vtransform,obc)
+  close(nc_ini)
+  %eval(['!cp ',ininame,' ',ini_prefix,'hct',nc_suffix])
+end
 
 toc
