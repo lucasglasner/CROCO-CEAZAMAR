@@ -19,7 +19,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import shutil
-from utils import add_itolap_bry
+from utils import add_itolap_forecast
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
 # crocotools_param.m static parameters
@@ -36,7 +36,7 @@ maindir         = '/ceaza/lucas/CROCO-CEAZAMAR/'
 SCRATCH_dir     = RUN_dir+'/SCRATCH/'
 today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazaf'
-itolap_mercator = 2  
+itolap_mercator = 4  
 itolap_variables   = [
     'zeta_west','vbar_west','ubar_west','v_west','u_west','temp_west','salt_west',
     'zeta_north','vbar_north','ubar_north','v_north','u_north','temp_north','salt_north',
@@ -181,16 +181,18 @@ def main_bry_forecast():
     print(' Adding overlap days to croco_bry files, please wait...            ')
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
-
-    add_itolap_bry(today, itolap=itolap_mercator,
+    add_itolap_forecast(today,
+                itolap=itolap_mercator,
                 variables=itolap_variables,
                 inputfiledir=CROCO_files_dir,
                 outputfiledir=SCRATCH_dir,
-                fprefix=fprefix+'_bry_')
-
+                fprefix=fprefix+'_bry_',
+                timename='bry_time',
+                freq=6)
+    
     bryname = SCRATCH_dir+fprefix+'_bry_'+today.strftime('%Y%m%d')+'.nc'
     if os.path.isfile(bryname):
-        print('Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
+        print(' Overwriting file...',bryname.replace(SCRATCH_dir,''),'     ')
         shutil.move(bryname,bryname.replace(SCRATCH_dir,CROCO_files_dir))     
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
@@ -205,7 +207,5 @@ if __name__=='__main__':
     if os.path.isfile(todayfile):
         print('Today file:',todayfile,'already exists!')
     else:
-        pass
-    main_bry_forecast()
-
+        main_bry_forecast()
 

@@ -149,7 +149,7 @@ def add_itolap_blk(date, itolap, variables, inputfiledir, outputfiledir,
         print('\t','Following day file not found:',
             'filling forwards with the last record')
         ntime = np.hstack([data[timename].values, ftimes])
-        data  = data.reindex({timename:ntime}).ffill(timename)
+        data  = data.drop_duplicates(timename).reindex({timename:ntime}).ffill(timename)
     
     ofname = fname.replace(inputfiledir,outputfiledir)
     xr.merge([complement, data]).to_netcdf(ofname, mode='w', engine='netcdf4',
@@ -255,9 +255,56 @@ def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
         print('\t','Following day file not found:',
             'filling forwards with the last record')
         ntime = np.hstack([data[timename].values, ftimes])
-        data  = data.reindex({timename:ntime}).sortby(timename).ffill(timename)
+        data  = data.drop_duplicates(timename).reindex({timename:ntime}).sortby(timename).ffill(timename)
         
     ofname = fname.replace(inputfiledir,outputfiledir)
     xr.merge([complement, data]).to_netcdf(ofname, mode='w', engine='netcdf4',
                    unlimited_dims=[timename])  
     return
+
+def add_itolap_forecast(date, itolap, variables, inputfiledir, outputfiledir,
+                   fprefix, timename, freq):
+    """
+    This function grabs a croco forecast file of a given date
+    and add overlaps based on the first and last time records.
+    
+    Args:
+        date (datetime): target date of file to fix
+        variables (list): list of strings with the variables
+        where to apply the overlap.
+        itolap (int): number of overlap records.
+        inputfiledir (str): input file directory
+        outputfiledir (str): output file directory
+        fprefix (str): croco file prefix.
+        freq (int): data frequency in hours
+        timename (str): dataset time dimension name.
+    """
+    # Load croco bry associated with given date
+    fnamep, fname, fnamef = find_itolap_datesnfiles(date, inputfiledir,fprefix)
+    print('\n','Adding overlap to ',fname)
+    try:
+        data = xr.open_dataset(fname, decode_times=False, decode_cf=False,
+                            decode_coords=False, decode_timedelta=False,
+                            use_cftime=False)
+        if 'bry' in fprefix:
+            data = croco_bry_swapdims(data)
+    except Exception as e:
+        print('\t',fname,e)
+        return
+
+    keys       = list(data.keys())
+    complement = np.array([k if k not in variables else None for k in keys])
+    complement = complement[complement!=None]
+    complement = data[complement]
+    data       = data[variables]
+    
+    ptime = (np.ones(itolap)*data[timename].values[0]-np.arange(1,itolap+1)*freq/24)[::-1]
+    ftime = (np.ones(itolap)*data[timename].values[-1]+np.arange(1,itolap+1)*freq/24)
+    ntime = np.hstack([ptime, data[timename].values, ftime])
+    print(' Filling forwards and backwards',fname)
+    data  = data.reindex({timename:ntime}).ffill(timename).bfill(timename)
+    
+    ofname = fname.replace(inputfiledir,outputfiledir)
+    xr.merge([complement, data]).to_netcdf(ofname, mode='w', engine='netcdf4',
+                   unlimited_dims=[timename])  
+    return data

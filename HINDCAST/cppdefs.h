@@ -71,7 +71,7 @@
                       /* Wave-current interactions */
 # undef  MRL_WCI
                       /* Open Boundary Conditions */
-# define  TIDES
+# undef  TIDES
 # undef  OBC_EAST
 # define OBC_WEST
 # define OBC_NORTH

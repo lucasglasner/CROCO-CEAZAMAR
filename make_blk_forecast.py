@@ -20,6 +20,8 @@ import os
 import datetime
 import numpy as np
 import pandas as pd
+import shutil
+from utils import add_itolap_forecast
 
 # ------------------------------- GENERAL STUFF ------------------------------ #
 # crocotools_param.m static parameters
@@ -37,6 +39,10 @@ SCRATCH_dir      = RUN_dir+'/SCRATCH/'
 today           = datetime.datetime.utcnow()
 fprefix         = 'crococeazaf'
 
+itolap_gfs       = 6  
+itolap_variables = [
+    'tair','rhum','prate','wspd','radlw','radlw_in','uwnd','vwnd','bulk_time','radsw'
+] 
 dates  = pd.date_range(
     (today-pd.Timedelta(days=hdays)).strftime('%F'),
     (today+pd.Timedelta(days=fdays)).strftime('%F')
@@ -85,6 +91,24 @@ def main_blk_forecast():
     print(' Dates =',dates,'                                                  ')
     print('-------------------------------------------------------------------')
     make_forecast_GFS()
+    print('-------------------------------------------------------------------')
+    print('',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'       ')
+    print(' Adding overlap days to croco_bry files, please wait...            ')
+    print(' Dates =',dates,'                                                  ')
+    print('-------------------------------------------------------------------')
+    add_itolap_forecast(today,
+                itolap=itolap_gfs,
+                variables=itolap_variables,
+                inputfiledir=CROCO_files_dir,
+                outputfiledir=SCRATCH_dir,
+                fprefix=fprefix+'_blk_',
+                timename='bulk_time',
+                freq=6)
+    
+    blkname = SCRATCH_dir+fprefix+'_blk_'+today.strftime('%Y%m%d')+'.nc'
+    if os.path.isfile(blkname):
+        print(' Overwriting file...',blkname.replace(SCRATCH_dir,''),'     ')
+        shutil.move(blkname,blkname.replace(SCRATCH_dir,CROCO_files_dir))    
     print('-------------------------------------------------------------------')
     print(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),'          ')
     endtime = datetime.datetime.utcnow()

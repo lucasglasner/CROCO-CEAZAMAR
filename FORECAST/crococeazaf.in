@@ -1,31 +1,31 @@
 title:
-        CROCOCEAZA_HINDCAST
+        CROCOCEAZA_FORECAST
 time_stepping: NTIMES   dt[sec]  NDTFAST  NINFO
                %NUMTIMES%   %TIMESTEP%   60      1
 S-coord: THETA_S,   THETA_B,    Hc (m)
            7.0d0     2.0d0      300.0d0
 grid:  filename
-                          crococeazah_grd.nc
+                          crococeazaf_grd.nc
 forcing: filename
-                          crococeazah_frc.nc
+                          crococeazaf_frc.nc
 bulk_forcing: filename
-                          crococeazah_blk.nc
+                          crococeazaf_blk.nc
 climatology: filename
-                          crococeazah_clm.nc
+                          crococeazaf_clm.nc
 boundary: filename
-                          crococeazah_bry.nc
+                          crococeazaf_bry.nc
 initial: NRREC  filename
           1 
-                          crococeazah_ini.nc
+                          crococeazaf_ini.nc
 restart:          NRST, NRPFRST / filename
-                  %NUMTIMES%   -1
-                          crococeazah_rst.nc
+                  4320   -1
+                          crococeazaf_rst.nc
 history: LDEFHIS, NWRT, NRPFHIS / filename 
             F      720       0
-                          crococeazah_his.nc
+                          crococeazaf_his.nc
 averages: NTSAVG, NAVG, NRPFAVG / filename
-            0      720       0
-                          crococeazah_avg.nc
+            1      720       0
+                          crococeazaf_avg.nc
 
 primary_history_fields: zeta UBAR VBAR  U  V   wrtT(1:NT)
                         F    F    F     F  F   30*F
@@ -35,7 +35,7 @@ gls_history_fields:   TKE  GLS  Lscale
                        F     F    F
 
 primary_averages: zeta UBAR VBAR  U  V   wrtT(1:NT)
-                  F    F    F     F  F  30*F
+                  F    F    F     F  F  30*T
 auxiliary_averages: rho Omega W  Akv  Akt  Aks Visc3d Diff3d  HBL HBBL Bostr Wstr Ustr Vstr Shfl rsw rlw lat sen Hm HEL BIOL
                     F   F     F  F    F    F   F      F       F   F    F     F    F    F    F    F   F   F   F   F  F   10*F
 gls_averages:   TKE  GLS  Lscale
@@ -70,11 +70,11 @@ nudg_cof:    TauT_in, TauT_out, TauM_in, TauM_out  [days for all]
 
 diagnostics:   ldefdia   nwrtdia    nrpfdia /filename
                   F        576         0
-                          crococeazah_dia.nc
+                          crococeazaf_dia.nc
 
 diag_avg: ldefdia_avg  ntsdia_avg  nwrtdia_avg  nprfdia_avg /filename
                F          1           576            0
-                          crococeazah_dia_avg.nc
+                          crococeazaf_dia_avg.nc
 
 diag3D_history_fields:    diag_tracers3D(1:NT) 
                             30*T
@@ -91,11 +91,11 @@ diag2D_average_fields:    diag_tracers2D_avg(1:NT)
 
 diagnosticsM:   ldefdiaM   nwrtdiaM    nrpfdiaM /filename
                    T         NUMHIS          0
-                                 crococeazah_diaM.nc
+                                 crococeazaf_diaM.nc
 
 diagM_avg: ldefdiaM_avg  ntsdiaM_avg  nwrtdiaM_avg  nprfdiaM_avg /filename
                T          1           NUMAVG            0
-                                 crococeazah_diaM_avg.nc
+                                 crococeazaf_diaM_avg.nc
 
 diagM_history_fields: diag_momentum(1:2)
                             T T
@@ -106,11 +106,11 @@ diagM_average_fields: diag_momentum_avg(1:2)
 
 diags_vrt:   ldefdiags_vrt, nwrtdiags_vrt, nrpfdiags_vrt /filename
                    T          NUMHIS        0
-    crococeazah_diags_vrt.nc
+    crococeazaf_diags_vrt.nc
 
 diags_vrt_avg: ldefdiags_vrt_avg  ntsdiags_vrt_avg  nwrtdiags_vrt_avg  nprfdiags_vrt_avg /filename 
                T          1          NUMAVG          0
-    crococeazah_diags_vrt_avg.nc
+    crococeazaf_diags_vrt_avg.nc
 
 diags_vrt_history_fields: diags_vrt
                             T 
@@ -121,11 +121,11 @@ diags_vrt_average_fields: diags_vrt_avg
 
 diags_ek:   ldefdiags_ek, nwrtdiags_ek, nrpfdiags_ek /filename
                    T          NUMHIS        0
-    crococeazah_diags_ek.nc
+    crococeazaf_diags_ek.nc
 
 diags_ek_avg: ldefdiags_ek_avg  ntsdiags_ek_avg  nwrtdiags_ek_avg  nprfdiags_ek_avg /filename
                T          1           NUMAVG          0
-    crococeazah_diags_ek_avg.nc
+    crococeazaf_diags_ek_avg.nc
 
 diags_ek_history_fields: diags_ek
                             T
@@ -135,11 +135,11 @@ diags_ek_average_fields: diags_ek_avg
 
 surf:   ldefsurf, nwrtsurf, nrpfsurf /filename
                    T          NUMHISSURF        0
-    crococeazah_surf.nc
+    crococeazaf_surf.nc
 
 surf_avg: ldefsurf_avg  ntssurf_avg  nwrtsurf_avg  nprfsurf_avg /filename
                T          1           NUMAVGSURF        0
-    crococeazah_surf_avg.nc
+    crococeazaf_surf_avg.nc
 
 surf_history_fields: surf
                             T
@@ -150,11 +150,11 @@ surf_average_fields: surf_avg
 
 diags_pv:   ldefdiags_pv, nwrtdiags_pv, nrpfdiags_pv /filename
                    T          NUMHIS        0
-    crococeazah_diags_pv.nc
+    crococeazaf_diags_pv.nc
 
 diags_pv_avg: ldefdiags_pv_avg  ntsdiags_pv_avg  nwrtdiags_pv_avg  nprfdiags_pv_avg /filename
                T          1           NUMAVG          0
-    crococeazah_diags_pv_avg.nc
+    crococeazaf_diags_pv_avg.nc
 
 diags_pv_history_fields: diags_pv(1:NT)
                             30*T
@@ -165,11 +165,11 @@ diags_pv_average_fields: diags_pv_avg(1:NT)
 
 diags_eddy:   ldefdiags_eddy, nwrtdiags_eddy, nrpfdiags_eddy /filename
                    T          NUMHIS        0
-    crococeazah_diags_eddy.nc
+    crococeazaf_diags_eddy.nc
 
 diags_eddy_avg: ldefdiags_eddy_avg  ntsdiags_eddy_avg  nwrtdiags_eddy_avg  nprfdiags_eddy_avg /filename
                T          1           NUMAVG          0
-    crococeazah_diags_eddy_avg.nc
+    crococeazaf_diags_eddy_avg.nc
 
 diags_eddy_history_fields: diags_eddy
                             T
@@ -180,11 +180,11 @@ diags_eddy_average_fields: diags_eddy_avg
 
 diagnostics_bio:   ldefdiabio   nwrtdiabio    nrpfdiabio /filename
                         T          NUMHIS             0
-    crococeazah_diabio.nc
+    crococeazaf_diabio.nc
 
 diagbio_avg: ldefdiabio_avg  ntsdiabio_avg  nwrtdiabio_avg  nprfdiabio_avg /filename
                   T              1              NUMAVG              0
-    crococeazah_diabio_avg.nc
+    crococeazaf_diabio_avg.nc
 
 diagbioFlux_history_fields:    wrtdiabioFlux 
                                  50*T 
@@ -205,10 +205,10 @@ diagbioGasExc_average_fields:  wrtdiabioGasExc_avg
 			         50*T
 	
 biology:   forcing file
-             crococeazah_frcbio.nc
+             crococeazaf_frcbio.nc
 
 wkb_boundary: filename
-             crococeazah_wkb.nc
+             crococeazaf_wkb.nc
 wkb_wwave:  amp [m], ang [deg], prd [s], tide [m], B_tg, gamma_tg
             0.25     190.        8.      -2.       1.3    0.38
 wkb_roller:  roller_sinb  roller_fraction
@@ -251,7 +251,7 @@ psource:   Nsrc  Isrc  Jsrc  Dsrc  Qbar [m3/s]    Lsrc        Tsrc
                   3    40     0    200.            T T      5. 0.
 
 psource_ncfile:   Nsrc  Isrc  Jsrc  Dsrc qbardir  Lsrc  Tsrc   runoff file name
-                                  crococeazah_runoff.nc
+                                  crococeazaf_runoff.nc
                  2
                         24  35  0  -1   30*T   5.0  0.0
                         35  13  1  -1   30*T   5.0  0.0

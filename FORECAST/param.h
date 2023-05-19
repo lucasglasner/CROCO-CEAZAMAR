@@ -180,7 +180,7 @@
       parameter (LLm0=167,  MMm0=170,  N=32)   ! BENGUELA_VHR
 # elif defined TESTSIM
       parameter (LLm0=323,  MMm0=292,  N=50) ! <------------------- NCCHILEv2 Chica de pruebas <- LUCAS
-# elif defined CROCOCEAZAH
+# elif defined CROCOCEAZA
       parameter (LLm0=150,  MMm0=250,  N=50) ! <------------------- Dominio pronóstico ceaza
 # else
       parameter (LLm0=xx, MMm0=xx, N=xx)  ! YOUR REGIONAL CONFIG

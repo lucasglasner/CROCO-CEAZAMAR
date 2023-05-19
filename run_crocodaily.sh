@@ -110,7 +110,7 @@ for i in $(seq 0 $NDAYS); do
     echo Saving outputs...
     mv -f ${MODEL}_rst.nc ${MODEL}_rst_${TIME}.nc
     mv -f ${MODEL}_avg.nc ${OUTPUTDIR}/${SIMNAME}_avg_${TIME}.nc
-    mv -f ${MODEL}_his.nc ${OUTPUTDIR}/${SIMNAME}_his_${TIME}.nc
+    # mv -f ${MODEL}_his.nc ${OUTPUTDIR}/${SIMNAME}_his_${TIME}.nc
 
     # Clean netcdf from scratch directory
     rm -f ${MODEL}_rst.nc
