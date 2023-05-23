@@ -60,8 +60,12 @@ for t=(now-MERCATOR_offset):now
     raw_mercator_name=[FRCST_dir,'/MERCATOR/HINDCAST/',datestr(t,'yyyy-mm-dd'),'.nc'];
     mercator_name=[SCRATCH_dir,'/mercator_',datestr(t,'yyyymmdd'),'.cdf'];
     disp(['    Raw motu download: ',raw_mercator_name])
-    write_mercator_frcst(SCRATCH_dir,'',raw_mercator_name, ...
-                         mercator_type,vars,t,Yorig,mercator_name); % write data
+    if exist(mercator_name, 'file') == 2
+      disp('')
+    else
+      write_mercator_frcst(SCRATCH_dir,'',raw_mercator_name, ...
+                          mercator_type,vars,t,Yorig,mercator_name); % write data
+    end
     disp(' ')
 end
 

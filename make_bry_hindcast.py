@@ -36,7 +36,7 @@ MERCATOR_offset = 2
  
  
 # GLOBAL PARAMETERS
-itolap_mercator = 2  
+itolap_mercator = 1  
 itolap_variables   = [
     'zeta_west','vbar_west','ubar_west','v_west','u_west','temp_west','salt_west',
     'zeta_north','vbar_north','ubar_north','v_north','u_north','temp_north','salt_north',

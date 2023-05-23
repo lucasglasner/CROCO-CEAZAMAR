@@ -174,7 +174,7 @@ def croco_bry_swapdims(data):
 
 def add_itolap_bry(date, itolap, variables, inputfiledir, outputfiledir,
                    fprefix='croco_bry_', timename='bry_time',
-                   freq=6):
+                   freq=24):
     """
     This function grabs a croco bry file of a given date
     and add overlaps based on the previous and following days files. 

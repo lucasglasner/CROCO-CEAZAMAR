@@ -24,7 +24,7 @@ history: LDEFHIS, NWRT, NRPFHIS / filename
             F      720       0
                           crococeazah_his.nc
 averages: NTSAVG, NAVG, NRPFAVG / filename
-            1      720       0
+            0      720       0
                           crococeazah_avg.nc
 
 primary_history_fields: zeta UBAR VBAR  U  V   wrtT(1:NT)
@@ -35,7 +35,7 @@ gls_history_fields:   TKE  GLS  Lscale
                        F     F    F
 
 primary_averages: zeta UBAR VBAR  U  V   wrtT(1:NT)
-                  T    F    F     T  T  30*T
+                  F    F    F     F  F  30*F
 auxiliary_averages: rho Omega W  Akv  Akt  Aks Visc3d Diff3d  HBL HBBL Bostr Wstr Ustr Vstr Shfl rsw rlw lat sen Hm HEL BIOL
                     F   F     F  F    F    F   F      F       F   F    F     F    F    F    F    F   F   F   F   F  F   10*F
 gls_averages:   TKE  GLS  Lscale

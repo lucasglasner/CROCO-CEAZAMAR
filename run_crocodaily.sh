@@ -20,9 +20,9 @@ NUMTIMES=$(expr 86400 / $TIMESTEP)                                              
 RUNCMD='mpirun '                                                                # Command for running the model executable
 cd $MAINDIR
 
-INIDATE='2022-01-01'
-ENDDATE='2022-12-31'
-SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/SCRATCH                                   # Directory where model is run
+INIDATE='2020-12-31'
+ENDDATE='2021-12-31'
+SCRATCHDIR=${MAINDIR}/HINDCAST/OUTPUT/SPINUP                                    # Directory where model is run
 OUTPUTDIR=${MAINDIR}/HINDCAST/OUTPUT                                            # Directory where model outputs are saved
 CROCOFILESDIR=${MAINDIR}/HINDCAST/CROCO_FILES                                   # Directory where croco forcing are stored
 CROCOEXEC=${MAINDIR}/HINDCAST/croco                                             # croco executable name
@@ -30,7 +30,7 @@ CROCOEXEC=${MAINDIR}/HINDCAST/croco                                             
 CROCOIN=${MAINDIR}/HINDCAST/${SIMNAME}.in                                       # croco.in textfile path
 CROCOGRID=${CROCOFILESDIR}/${SIMNAME}_grd.nc                                    # path to model grid                                
 NCCOPY="/ceaza/lucas/miniconda3/envs/main/bin/nccopy -k classic"                # path to nccopy binary (netcdf package)
-RESTART=1                                                                       # 0 - 1 for use restart or ini file
+RESTART=0                                                                       # 0 - 1 for use restart or ini file
 #################################################################################################################################
 #                                                    END OF USER SELECTIONS                                                     #
 #################################################################################################################################
