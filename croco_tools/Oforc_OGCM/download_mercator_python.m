@@ -38,7 +38,7 @@ function download_mercator_python(pathMotu,user,password,mercator_type, ...
 %  Update     23-Oct-2020 by Gildas Cambon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pathMotu is a deprecated parameter ! 
-download_raw_data=0;
+download_raw_data=1;
 convert_raw2crocotools=1; % convert -> crocotools format data
 %
 % Set variable names according to mercator type data
@@ -56,7 +56,6 @@ disp(['Maximum Longitude: ',num2str(lonmax)])
 disp(['Minimum Latitude: ',num2str(latmin)])
 disp(['Maximum Latitude: ',num2str(latmax)])
 disp([' '])
-
 %
 % Create the directory
 %
@@ -121,7 +120,7 @@ if convert_raw2crocotools
     end
     write_mercator(OGCM_dir,OGCM_prefix,raw_mercator_name, ...
                    mercator_type,vars,time,thedatemonth,Yorig); % write data
-    %eval(['! rm -f ',raw_mercator_name]);
+    eval(['! rm -f ',raw_mercator_name]);
 end
 
 end

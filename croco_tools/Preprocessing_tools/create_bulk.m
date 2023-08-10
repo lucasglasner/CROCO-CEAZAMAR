@@ -113,17 +113,17 @@ nw{'radsw'}.units      = 'Watts meter-2';
 nw{'radsw'}.positive   = ncchar('downward flux, heating water');
 nw{'radsw'}.positive   = 'downward flux, heating water';
 
-% nw{'sustr'} = ncdouble('bulk_time', 'eta_u', 'xi_u');
-% nw{'sustr'}.long_name = ncchar('surface u-momentum stress');
-% nw{'sustr'}.long_name = 'surface u-momentum stress';
-% nw{'sustr'}.units = ncchar('Newton meter-2');
-% nw{'sustr'}.units = 'Newton meter-2';
+nw{'sustr'} = ncdouble('bulk_time', 'eta_u', 'xi_u');
+nw{'sustr'}.long_name = ncchar('surface u-momentum stress');
+nw{'sustr'}.long_name = 'surface u-momentum stress';
+nw{'sustr'}.units = ncchar('Newton meter-2');
+nw{'sustr'}.units = 'Newton meter-2';
 
-% nw{'svstr'} = ncdouble('bulk_time', 'eta_v', 'xi_v');
-% nw{'svstr'}.long_name = ncchar('surface v-momentum stress');
-% nw{'svstr'}.long_name = 'surface v-momentum stress';
-% nw{'svstr'}.units = ncchar('Newton meter-2');
-% nw{'svstr'}.units = 'Newton meter-2';
+nw{'svstr'} = ncdouble('bulk_time', 'eta_v', 'xi_v');
+nw{'svstr'}.long_name = ncchar('surface v-momentum stress');
+nw{'svstr'}.long_name = 'surface v-momentum stress';
+nw{'svstr'}.units = ncchar('Newton meter-2');
+nw{'svstr'}.units = 'Newton meter-2';
 
 nw{'uwnd'} = ncdouble('bulk_time', 'eta_u', 'xi_u');
 nw{'uwnd'}.long_name = ncchar('10m u-wind component');
@@ -155,7 +155,7 @@ nw.type = 'CROCO heat flux bulk forcing file';
 %
 % Write time variables
 %
-for tndx=1:length(bulkt) 
+for tndx=1:length(bulkt)
    if mod(tndx,20)==0
      disp(['Time Step Bulk: ',num2str(tndx),' of ',num2str(length(bulkt))])
    end

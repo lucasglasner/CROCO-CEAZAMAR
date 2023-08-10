@@ -1,5 +1,5 @@
 function write_mercator_frcst(FRCST_dir,FRCST_prefix,raw_mercator_name,...
-                              mercator_type,vars,time,Yorig,newname)
+                              mercator_type,vars,time,Yorig)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Extract a subset from Marcator using python motu client (cls)
@@ -31,14 +31,20 @@ function write_mercator_frcst(FRCST_dir,FRCST_prefix,raw_mercator_name,...
 %  Updated    9-Sep-2006 by Pierrick Penven
 %  Updated    19-May-2011 by Andres Sepulveda & Gildas Cambon
 %  Updated    12-Feb-2016 by P. Marchesiello
-%
+%  Updated    06-May-2023 by Efrain Rodriguez-Rubio & P. Marchesiello
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 disp(['    writing MERCATOR file'])
+
+fname_z=[raw_mercator_name(1:end-3),'_z.nc'];
+fname_u=[raw_mercator_name(1:end-3),'_u.nc'];
+fname_t=[raw_mercator_name(1:end-3),'_t.nc'];
+fname_s=[raw_mercator_name(1:end-3),'_s.nc'];
+
 %
 % Get grid and time frame
 %
-nc = netcdf(raw_mercator_name);
+nc = netcdf(fname_u,'r');
 if mercator_type==1,
   lon = nc{'longitude'}(:);
   lat = nc{'latitude'}(:);
@@ -52,80 +58,90 @@ else
   time = nc{'time'}(:);
   time = time / 86400 + datenum(2014,1,9) - datenum(Yorig,1,1);
 end
+close(nc)
 %
 % Get SSH
 %
 %missval = -32767;
 disp('    ...SSH')
+nc = netcdf(fname_z,'r');
 vname=sprintf('%s',vars{1});
 ncc=nc{vname};
 ssh=ncc(:);
 missval=ncc.FillValue_(:);
-scale_factor=ncc.scale_factor(:);
-add_offset=ncc.add_offset(:);
-ssh(ssh<=missval)=NaN;
+scale_factor=1; %ncc.scale_factor(:);
+add_offset=0.;  %ncc.add_offset(:);
+ssh(ssh>=missval)=NaN;
 ssh = ssh.*scale_factor + add_offset;
+close(nc)
 %
 %
 % Get U
 %
 disp('    ...U')
+nc = netcdf(fname_u,'r');
 vname=sprintf('%s',vars{2});
 ncc=nc{vname};
 u=ncc(:);
 missval=ncc.FillValue_(:);
-scale_factor=ncc.scale_factor(:);
-add_offset=ncc.add_offset(:);
-u(u<=missval)=NaN;
+scale_factor=1; %ncc.scale_factor(:);
+add_offset=0.;  %ncc.add_offset(:);
+u(u>=missval)=NaN;
 u = u.*scale_factor + add_offset;
+close(nc)
 %
 % Get V
 %
 disp('    ...V')
+nc = netcdf(fname_u,'r');
 vname=sprintf('%s',vars{3});
 ncc=nc{vname};
 v=ncc(:);
 missval=ncc.FillValue_(:);
-scale_factor=ncc.scale_factor(:);
-add_offset=ncc.add_offset(:);
-v(v<=missval)=NaN;
+scale_factor=1; %ncc.scale_factor(:);
+add_offset=0.;  %ncc.add_offset(:);
+v(v>=missval)=NaN;
 v = v.*scale_factor + add_offset;
+close(nc)
 %
 % Get TEMP
 %
 disp('    ...TEMP')
+nc = netcdf(fname_t,'r');
 vname=sprintf('%s',vars{4});
 ncc=nc{vname};
 temp=ncc(:);
 missval=ncc.FillValue_(:);
-scale_factor=ncc.scale_factor(:);
-add_offset=ncc.add_offset(:);
+scale_factor=1; %ncc.scale_factor(:);
+add_offset=0.;  %ncc.add_offset(:);
 ktoc=272.15;
-temp(temp<=missval)=NaN;
+temp(temp>=missval)=NaN;
 temp = temp.*scale_factor + add_offset; % - ktoc;
+close(nc)
 %
 % Get SALT
 %
 disp('    ...SALT')
+nc = netcdf(fname_s,'r');
 vname=sprintf('%s',vars{5});
 ncc=nc{vname};
 salt=ncc(:);
 missval=ncc.FillValue_(:);
-scale_factor=ncc.scale_factor(:);
-add_offset=ncc.add_offset(:);
-salt(salt<=missval)=NaN;
+scale_factor=1; %ncc.scale_factor(:);
+add_offset=0.;  %ncc.add_offset(:);
+salt(salt>=missval)=NaN;
 salt = salt.*scale_factor + add_offset;
+close(nc)
 %
 % Create the Mercator file
 %
 rundate_str=date;
 rundate=datenum(rundate_str)-datenum(Yorig,1,1);
-close(nc)
 
-create_OGCM(newname,...
-            lon,lat,lon,lat,lon,lat,depth,time,...
-            squeeze(temp),squeeze(salt),squeeze(u),...
-            squeeze(v),squeeze(ssh),Yorig)
+create_OGCM([FRCST_dir,FRCST_prefix,num2str(rundate),'.cdf'],...
+             lon,lat,lon,lat,lon,lat,depth,time,...
+             squeeze(temp),squeeze(salt),squeeze(u),...
+             squeeze(v),squeeze(ssh),Yorig)
 %
 return
 

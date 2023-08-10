@@ -59,20 +59,19 @@ for iyear in range(year_start,year_end+1):
         vname = variables[k]
         vlong = era5[vname][0]
 
-        print('  Processing variable: '+vname+'_Y'+str(iyear)+'M'+str(imonth))
+        print('  Processing variable: '+vname)
 
 #
 # Read input filedate.toordinal(date(Yorig,1,1))
 #
 
-        fname_in = era5_dir_raw + '/ERA5_' + vname.upper() + '_Y' + str(iyear) + 'M' + str(imonth).zfill(2) + '.nc'
+        fname_in = era5_dir_raw + '/ERA5_ecmwf_' + vname.upper() + '_Y' + str(iyear) + 'M' + str(imonth).zfill(2) + '.nc'
         nc = netcdf(fname_in,'r+',format='NETCDF4')
         time = nc.variables['time'][:]
         lat = nc.variables['latitude'][:]
         lon = nc.variables['longitude'][:]
         data = nc.variables[vname][:,:,:]
         nc.close()
-
 
 #
 # Flip latitudes (to have increasing latitudes...)

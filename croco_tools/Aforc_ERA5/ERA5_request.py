@@ -37,38 +37,25 @@ from era5_crocotools_param import *
 print('year_start is '+str(year_start))
 
 # -------------------------------------------------
-
+dl=2
 if ownArea == 0:
-    dl = 2    
     lines = [line.rstrip('\n') for line in open(paramFile)]
     for line in lines:
         if "lonmin" in line:
-            for i in range(len(line)):
-                if line[i] == "=":
-                    iStart = i+1
-                elif line[i] == ";":
-                    iEnd = i
+            iStart=line.find('=')+1
+            iEnd=line.find(';')
             lonmin = line[iStart:iEnd]
         elif "lonmax" in line:
-            for i in range(len(line)):
-                if line[i] == "=":
-                    iStart = i+1
-                elif line[i] == ";":
-                    iEnd = i
+            iStart=line.find('=')+1
+            iEnd=line.find(';')
             lonmax = line[iStart:iEnd]
         elif "latmin" in line:
-            for i in range(len(line)):
-                if line[i] == "=":
-                    iStart = i+1
-                elif line[i] == ";":
-                    iEnd = i
+            iStart=line.find('=')+1
+            iEnd=line.find(';')
             latmin = line[iStart:iEnd]
         elif "latmax" in line:
-            for i in range(len(line)):
-                if line[i] == "=":
-                    iStart = i+1
-                elif line[i] == ";":
-                    iEnd = i
+            iStart=line.find('=')+1
+            iEnd=line.find(';')
             latmax = line[iStart:iEnd]
 
 lonmin = str(float(lonmin)-dl)
@@ -118,8 +105,6 @@ for j in range(len_monthly_dates):
     # Year and month
     year = monthly_date.year;
     month = monthly_date.month;
-    #year = year
-    # month = 12
 
     # Number of days in month
     days_in_month = calendar.monthrange(year,month)[1]
@@ -160,7 +145,7 @@ for j in range(len_monthly_dates):
 		  
         # Add options to Variable without "diurnal variations"
         if vlong == 'sea_surface_temperature':
-            options['time'] = '00:00'
+           options['time'] = '00'
    
         elif vlong == 'land_sea_mask':
             options['time'] = '00:00'
@@ -178,9 +163,8 @@ for j in range(len_monthly_dates):
            product = 'reanalysis-era5-single-levels'
 
         # Output filename
-        fname = 'ERA5_' + vname.upper() + '_Y' + str(year) + 'M' + str(month).zfill(2) + '.nc'
+        fname = 'ERA5_ecmwf_' + vname.upper() + '_Y' + str(year) + 'M' + str(month).zfill(2) + '.nc'
         output = era5_dir_raw + '/' + fname
-     #   options['filename'] = output
 
         # Information strings
         info_time_clock = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -201,15 +185,8 @@ for j in range(len_monthly_dates):
         # Server ECMWF-API
         c = cdsapi.Client()
 
-        # # ----------------- edit lucas 2022 check for file existance ----------------- #
-        # #Check file existance
-        
-        if os.path.exists(output):
-            print('\n File already exists in: '+output)
-        else:
-            # Do the request
-            c.retrieve(product,options,output)
-            pass
+        # Do the request
+        c.retrieve(product,options,output)
   
     # ---------------------------------------------------------------------
     # Next iteration to monthly date: add one month to current monthly date

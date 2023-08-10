@@ -25,6 +25,7 @@
 %
 %
 %  July 2013: G. Cambon (IRD/LEGOS) & M. Herrmann (IRD/LEGOS)
+%  July 2023 : G. Cambon (IRD/LOPS)
 %
 clear all
 close all
@@ -134,7 +135,16 @@ if define_dir==1
 % $$$     dir(10,:)= [1 ,  1];  % # Magdalena
 % $$$     dir(11,:)= [1,  -1];  % # Urugay same dir/sense as Parana
 % $$$     dir(12,:)= [0 ,  0];  % # Danube (not used)
-% $$$     dir(13,:)= [0 , -1];  % # Niger     
+% $$$     dir(13,:)= [0 , -1];  % # Niger  
+
+%ARVOR FAMILY for river # 1 to 6 without Danube
+    dir(1,:) = [0 ,  1];  % # Orinoco
+    dir(2,:) = [0 ,  1];  % # Mississipi
+    dir(3,:) = [0 ,  1];  % # Saint Lawrence
+    dir(4,:) = [1 ,  1];  % # Magdalena
+    dir(5,:) = [0 ,  0];  % # Danube (not used)
+    dir(6,:) = [1 , -1];  % # Niger  
+
 end
 %=========================================================================================
 %%%%%%%%%%%%%%%%%%% END USERS DEFINED VARIABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -204,11 +214,22 @@ else
         I(k)=i-1;
         I(I<1)=1;
         J(J<1)=1;
-        
+
         disp(['  Position is approximetly  J=',num2str(J(k)),' and I=',num2str(I(k))])
-        disp(['lon src in grid (rho point) ~',num2str(lon(J(k),I(k)))])
-        disp(['lat src in grid (rho point) ~',num2str(lat(J(k),I(k)))])
+        disp(['     lon src in grid (rho point) ~',num2str(lon(J(k),I(k)))])
+        disp(['     lat src in grid (rho point) ~',num2str(lat(J(k),I(k)))])
     end
+    %==========================================
+    mod_manual =0
+    if mod_manual
+    % Modify position runoff manually
+    % River number to modify number to modify 
+        kmod = 3;
+        J(kmod) =  J(kmod); 
+        I(kmod) = I(kmod) - 10 ; 
+        disp(['River #',num2str(kmod),': ',char(myrivername(kmod,:)),' modified manually'])
+    end
+    %==========================================
     %%
     %% Check the river you really have to process.
     %% Remove rivers out of the domain, if any...
@@ -218,15 +239,15 @@ else
     %%debug
     %%rivertoprocess=1
     %=================
-    
     number_rivertoprocess=length(rivertoprocess);
     rivername=strvcat(myrivername(rivertoprocess,:));
     rivernumber=number_rivertoprocess;
     rivname_StrLen=size(rivername,2);
  
     %% Make a figure
-    
+
     if plotting==1
+        dl = mean(lat(2:end,1) - lat(1:end-1,1));
         fig1=figure(1);
         set(fig1,'Position',[659 34 1334 1307],'units','pixels');
         m_proj('mercator',...            % dl/2 shift to have cells centered on lon/lat
@@ -250,17 +271,17 @@ else
         pause
         %%
         if plotting_zoom
-        %% to be adapeted regarding the configuration
-% $$$         extendpointY=[500 500 500 500 ...
-% $$$                       500 600 900 500 ...
-% $$$                       500 500 500 50 ...
-% $$$                       500 ];
-% $$$         extendpointX=[500 500 500 500 ...
-% $$$                       500 600 900 500 ...
-% $$$                       500 500 500 50 ...
-% $$$                       500 ];
-            extendpointY=50*ones(number_rivertoprocess,1);
-            extendpointX=50*ones(number_rivertoprocess,1);
+        %% to be adapted regarding the configuration
+            % extendpointY=[500 500 500 500 ...
+            %               500 600 900 500 ...
+            %               500 500 500 50 ...
+            %               500 ];
+            % extendpointX=[500 500 500 500 ...
+            %               500 600 900 500 ...
+            %               500 500 500 50 ...
+            %               500 ];
+            extendpointY=20*ones(number_rivertoprocess,1);
+            extendpointX=20*ones(number_rivertoprocess,1);
             nfig0=5;
             for k=1:number_rivertoprocess
                 nfig=nfig0+k;
@@ -282,37 +303,25 @@ else
                 mylat_point=lat(Jzoom_start : Jzoom_end,Izoom_start : Izoom_end);
                 mymask_point=mask(Jzoom_start : Jzoom_end,Izoom_start : Izoom_end);    
                 
-% $$$                 %%-Replace by specific case for  GIGATL1
-% $$$                 if (k ~= 12 )
-% $$$                     mylon_point=lon(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
-% $$$                                     I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
-% $$$                     mylat_point=lat(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
-% $$$                                     I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
-% $$$                     mymask_point=mask(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
-% $$$                                       I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
-% $$$                 else
-% $$$                     mylon_point=lon(J(k)+1 - extendpointYkk : J(k)+1,...
-% $$$                                     I(k)+1 - extendpointXkk : I(k)+1 ) ;
-% $$$                     
-% $$$                     mylat_point=lat(J(k)+1 - extendpointYkk : J(k)+1,...
-% $$$                                     I(k)+1 - extendpointXkk : I(k)+1) ;
-% $$$                     
-% $$$                     mymask_point=mask(J(k)+1 - extendpointYkk : J(k)+1,...
-% $$$                                          I(k)+1 - extendpointXkk : I(k)+1);
-% $$$                 end 
-% $$$                 %%- end Specific plotting  
-                
-                
-                m_proj('mercator',...    % dl/2 shift to have cells centered on lon/lat
-                       'lon',[min(min(mylon_point-dl/2)) max(max(mylon_point-dl/2)) ],...
-                       'lat',[min(min(mylat_point-dl/2)) max(max(mylat_point-dl/2)) ] );
-                m_pcolor(mylon_point-dl/2,mylat_point-dl/2,mymask_point) ; shading flat
-                m_grid('box','fancy','xtick',5,'ytick',5,'tickdir','out');
-                set(findobj('tag','m_grid_color'),'facecolor','white');
-                hold on
-                [px,py]=m_ll2xy(lon_src,lat_src);
-                h11=plot(px,py,'ro');
-                title(['\bf', myrivername(k,:)]);
+            %     %% -Replace by specific case for  GIGATL1
+            %    if (k ~= 12 )
+            %         mylon_point=lon(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
+            %                          I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
+            %         mylat_point=lat(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
+            %                          I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
+            %          mymask_point=mask(J(k)+1 - extendpointYkk : J(k)+1 + extendpointYkk,...
+            %                            I(k)+1 - extendpointXkk : I(k)+1 + extendpointXkk);
+            %      else
+            %          mylon_point=lon(J(k)+1 - extendpointYkk : J(k)+1,...
+            %                          I(k)+1 - extendpointXkk : I(k)+1 ) ;
+                     
+            %          mylat_point=lat(J(k)+1 - extendpointYkk : J(k)+1,...
+            %                          I(k)+1 - extendpointXkk : I(k)+1) ;
+                     
+            %          mymask_point=mask(J(k)+1 - extendpointYkk : J(k)+1,...
+            %                               I(k)+1 - extendpointXkk : I(k)+1);
+            %      end 
+            %      %%- end Specific plotting  
             end
         end
     end
@@ -384,101 +393,33 @@ else
         jj=J(k);
         ii=I(k);
         dir2=dir(k,:);
-        
-% $$$         %% Example manual modification for GIGATL family runs
-% $$$         %% GIGATL6 [BASE]:  Amazon Tocantins Orenoque Mississipi
-% $$$         %%                  Tapajos Xingu Magdalena
-% $$$         
-% $$$         if k0 == 1    % Amazon
-% $$$             jj=jj+5
-% $$$             
-% $$$         end
-% $$$         if k0 == 6    % Tocantins
-% $$$             ii=ii+1
-% $$$         end
-% $$$         if k0 == 3    %Orenoque
-% $$$             jj=jj-12
-% $$$         end
-% $$$         if k0 == 4    %Mississipi
-% $$$             ii=ii-6
-% $$$         end
-% $$$         if k0 == 7    %Tapajos
-% $$$             jj=jj+14
-% $$$         end
-% $$$         if k0 == 9    %Xingu
-% $$$             jj=jj+24
-% $$$         end
-% $$$         if k0 == 10   %Magdalena
-% $$$             ii=ii+7
-% $$$         end
-% $$$         
-% $$$         %%====================================================================
-% $$$         %% 
-% $$$         %% GIGATL3 (Multiply base by 2 for the jj and ii offset]
-% $$$         %% =>   Amazon Tocantins Orenoque Mississipi Tapajos Xingu Magdalena
-% $$$         if k0 == 1     % Amazon
-% $$$             jj=jj+10 - 2
-% $$$         end
-% $$$         if k0 == 6    % Tocantins
-% $$$             ii=ii+2
-% $$$         end
-% $$$         if k0 == 3    %Orenoque
-% $$$             jj=jj-24 -2
-% $$$         end
-% $$$         if k0 == 4    %Mississipi
-% $$$             ii=ii-12
-% $$$         end
-% $$$         if k0 == 7    %Tapajos
-% $$$             jj=jj+28
-% $$$         end
-% $$$         if k0 == 9    %Xingu
-% $$$             jj=jj+48
-% $$$         end
-% $$$         if k0 == 10   %Magdalena
-% $$$             ii=ii+14
-% $$$         end
-% $$$         
-% $$$         %%====================================================================
-% $$$         %%
-% $$$         %% GIGATL1 (Multiply base by 6 for the jj and ii offset]
-% $$$         %% =>   Amazon Tocantins Orenoque Mississipi Tapajos Xingu Magdalena
-% $$$         if k0 == 1     % Amazon
-% $$$             jj=jj+24
-% $$$         end
-% $$$         if k0 == 6    % Tocantins
-% $$$             ii=ii+6
-% $$$         end
-% $$$         if k0 == 3    %Orenoque
-% $$$             jj=jj-78 - 21
-% $$$         end
-% $$$         if k0 == 4    %Mississipi
-% $$$             ii=ii-36
-% $$$         end
-% $$$         if k0 == 7    %Tapajos
-% $$$             jj=jj+84
-% $$$         end
-% $$$         if k0 == 9    %Xingu
-% $$$             jj=jj+144
-% $$$         end
-% $$$         if k0 == 10   %Magdalena
-% $$$             ii=ii+42
-% $$$         end
-% $$$         
-% $$$         %% End Example manual modifications for GIGATL family runs
-% $$$         %%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-        
-        [jj2,ii2]=locate_runoff(dir2,jj,ii,mask,masku,maskv);
+        %
+        % Compute the u and v cells indexes in CROCO convention
+        [jj2for_out,ii2for_out, jj2for,ii2for,jj2,ii2]=locate_runoff(dir2,jj,ii,mask,masku,maskv);
+        % 
+        J2for_out(k)=jj2for_out;
+        I2for_out(k)=ii2for_out;
+        %
+        J2for(k)=jj2for;
+        I2for(k)=ii2for;
+        %
         J2(k)=jj2;
         I2(k)=ii2;
-        disp([char(myrivername(k,:)),' is J=',num2str(J2(k)),' and I=',num2str(I2(k))])
-        disp([' '])
+        %
+        disp([char(myrivername(k,:)),' runoff wet cell (rho-point) indices are :'])
+        disp(['matlab             J=',num2str(J2(k)),' and I=',num2str(I2(k))])
+        disp(['CROCO fortran conv J=',num2str(J2for(k)),' and I=',num2str(I2for(k))])
+        disp([''])
+        disp(['For u or v cells indices are (CROCO fortran convention)'])
+        disp(['Jsrc=',num2str(J2for_out(k)),' and Isrc=',num2str(I2for_out(k))])
+        disp(['===='])
     end
     %%
     %% Adjust the rivers temperature and salinity
     %%
     if psource_ncfile_ts==1
         disp([' '])
-        disp([' Adjust the rivers temperature and salinity '])
+        disp(['Adjust the rivers temperature and salinity '])
         %%disp([' Use the closest surface point in the climatology file '])
         my_temp_src0=zeros(rivernumber ,length(woa_time));
         my_salt_src0=zeros(rivernumber ,length(woa_time));
@@ -513,7 +454,7 @@ else
                 %%
                 S=squeeze(ncclim{'salt'}(:,N,j_rho,i_rho))-10; % hum...
                 S(S<2)=2.0001; % to prevent negative salinities in the
-                          % equation of state
+                               % equation of state
                 disp(['  Use psource_ncfile_ts_auto using S = sclim -10 '])
                 disp(['  Check line 464 in make_runoff.m to change ' ...
                        'this arbitrary runoff salinity'])
@@ -636,13 +577,12 @@ else
 % $$$                                 33.0312  ];
             %%            
             my_salt_src0(:,:)=ones(rivernumber,12)*5;
-            %%
             if makebio
 % $$$           my_no3_src0=[0 0 0 0 0 0 0 0 0 0 0 0];
             end
         end
         %%
-        %%Effectivelly processed rivers
+        %% Effectivelly processed rivers
         %%
         my_temp_src= my_temp_src0(find(indomain_last==1),:);
         my_salt_src= my_salt_src0(find(indomain_last==1),:);
@@ -662,12 +602,13 @@ else
                'lat',[latmin-dl/2 latmax-dl/2]);
         for k0=1:number_rivertoprocess
             k=rivertoprocess(k0);
+
             if dir(k,1)==0 %zonal flow (u-grid)
-               lon_src=lonu(J2(k),I2(k));
-               lat_src=latu(J2(k),I2(k));
+                lon_src=lonu(J2(k),I2for_out(k)); % Adjusted position
+                lat_src=latu(J2(k),I2for_out(k)); % + nice plot
             else           %meridional flow (v-grid)
-               lon_src=lonv(J2(k),I2(k));
-               lat_src=latv(J2(k),I2(k));               
+               lon_src=lonv(J2for_out(k),I2(k)); % Adjusted position
+               lat_src=latv(J2for_out(k),I2(k)); % + nice plot  
             end
             [px,py]=m_ll2xy(lon_src,lat_src);
             if dir(k,1)==0 & dir(k,2)==1
@@ -693,37 +634,43 @@ else
                 close(nfig);
                 figure(nfig);
                 
+                lon_src0=lon(J(k),I(k));  % First guess position
+                lat_src0=lat(J(k),I(k)); 
                 if dir(k,1)==0 %zonal flow (u-grid)
-                   lon_src0=lonu(J(k),I(k));  % First guess position
-                   lat_src0=latu(J(k),I(k));
-                   lon_src=lonu(J2(k),I2(k)); % Adjusted position
-                   lat_src=latu(J2(k),I2(k));
+                    lon_src=lonu(J2(k),I2for_out(k)); % Adjusted position
+                    lat_src=latu(J2(k),I2for_out(k)); % + nice plot
                 else           %meridional flow (v-grid)
-                   lon_src0=lonv(J(k),I(k));  % First guess position
-                   lat_src0=latv(J(k),I(k));  
-                   lon_src=lonv(J2(k),I2(k)); % Adjusted position
-                   lat_src=latv(J2(k),I2(k));               
+                   lon_src=lonv(J2for_out(k),I2(k)); % Adjusted position
+                   lat_src=latv(J2for_out(k),I2(k)); % + nice plot  
                 end
-                
+                %
+                lon_src_r=lon(J2(k),I2(k));
+                lat_src_r=lat(J2(k),I2(k));
+                dlzoom = lat(J2(k),I2(k)) - lat(J2(k)-1,I2(k));
+                %
+                disp(['Final position of the target wet cell (rho-point) is J=',num2str(J2for_out(k)),' and I=',num2str(I2for_out(k))])
+                disp(['   lon src in grid ',num2str(lon_src_r)])
+                disp(['   lat src in grid ',num2str(lat_src_r)])  
+                disp(['   '])
+                %
                 extendpointYkk=extendpointY(k);
                 extendpointXkk=extendpointX(k);
-                
+                %
                 Izoom_start=max(1,I(k) - extendpointXkk);
                 Izoom_end=min(size(mask,2),I(k) + extendpointXkk); 
                 Jzoom_start=max(1,J(k) - extendpointYkk);
                 Jzoom_end=min(size(mask,1),J(k) + extendpointYkk); 
                 
-                %% Generic case    
+                %% Generic case for zoom 
                 mylon_point=lon(Jzoom_start : Jzoom_end,Izoom_start : Izoom_end);
                 mylat_point=lat(Jzoom_start : Jzoom_end,Izoom_start : Izoom_end);
                 mymask_point=mask(Jzoom_start : Jzoom_end,Izoom_start : Izoom_end); 
-                
                 %%
-                m_proj('mercator',...   %  dl/2 shift to have cells centered on lon/lat
-                       'lon',[min(min(mylon_point-dl/2)) max(max(mylon_point-dl/2)) ],...
-                       'lat',[min(min(mylat_point-dl/2)) max(max(mylat_point-dl/2)) ] );
+                m_proj('mercator',...   %  dlzoom/2 shift to have cells centered on lon/lat
+                       'lon',[min(min(mylon_point-dlzoom/2)) max(max(mylon_point-dlzoom/2)) ],...
+                       'lat',[min(min(mylat_point-dlzoom/2)) max(max(mylat_point-dlzoom/2)) ] );
                 
-                m_pcolor(mylon_point-dl/2,mylat_point-dl/2,mymask_point) ; shading flat
+                m_pcolor(mylon_point-dlzoom/2,mylat_point-dlzoom/2,mymask_point) ; %shading flat
                 m_grid('box','fancy','xtick',5,'ytick',5,'tickdir','out');
                 set(findobj('tag','m_grid_color'),'facecolor','white');
                 hold on
@@ -731,17 +678,31 @@ else
                 h11=plot(px0,py0,'ro');
                 [px,py]=m_ll2xy(lon_src,lat_src);     % Adjusted position
                 if dir(k,1)==0 & dir(k,2)==1
-                   h33=plot(px,py,'k>');
-                elseif dir(k,1)==0 & dir(k,2)==-1
-                   h33=plot(px,py,'k<');     
-                elseif dir(k,1)==1 & dir(k,2)==1
-                   h33=plot(px,py,'k^');
-                elseif dir(k,1)==1 & dir(k,2)==-1
-                   h33=plot(px,py,'kv');  
-                end 
+                    h33=plot(px,py,'k>');
+                 elseif dir(k,1)==0 & dir(k,2)==-1
+                    h33=plot(px,py,'k<');     
+                 elseif dir(k,1)==1 & dir(k,2)==1
+                    h33=plot(px,py,'k^');
+                 elseif dir(k,1)==1 & dir(k,2)==-1
+                    h33=plot(px,py,'kv');  
+                 end 
                 legend([h11,h33],{'Approximative first guess river location','final adjusted river location'});
-
                 title(['\bf', myrivername(k,:)]);
+                %
+                % pcolor(mylon_point-dlzoom/2,mylat_point-dlzoom/2,mymask_point) ; %shading flat
+                % hold on
+                % h11=plot(lon_src0,lat_src0,'ro');
+                % if dir(k,1)==0 & dir(k,2)==1
+                %     h33=plot(lon_src,lat_src,'k>');
+                %  elseif dir(k,1)==0 & dir(k,2)==-1
+                %     h33=plot(lon_src,lat_src,'k<');     
+                %  elseif dir(k,1)==1 & dir(k,2)==1
+                %     h33=plot(lon_src,lat_src,'k^');
+                %  elseif dir(k,1)==1 & dir(k,2)==-1
+                %     h33=plot(lon_src,lat_src,'kv');  
+                %  end 
+                % legend([h11,h33],{'Approximative first guess river location','final adjusted river location'});
+                % title(['\bf', myrivername(k,:)]);
             end
         end
     end
@@ -754,17 +715,27 @@ else
     %%nw{'runoff_position'}(:,:)=[I2(find(indomain_last==1)) J2(find(indomain_last==1))];
     %%nw{'runoff_direction'}(:,:)=dir(find(indomain_last==1),:);
     %%disp(['... river positions'])
-    %% Write qbar, temp,salt and bgc variables conc.
-    cff=1;
-    %%
-    %%debug cff=150;
-    %%disp(['================== WARNING ============================'])
-    %%disp(['Use a cff coef to increase the discharge= ',num2str(cff)])
-    %%disp(['======================================================='])
-    %% end debug
+    %%Write qbar, temp,salt and bgc variables conc.
+    cff = 1; 
+    %
+    debugflow=0; 
+    if debugflow
+        cff=10;
+        disp(['================== WARNING ============================'])
+        disp(['debugflow is on See line 633 in make_runoff.m          ']) 
+        disp(['Use a cff coef to increase the discharge= ',num2str(cff)])
+        disp(['======================================================='])
+    end
     
     my_flow=cff.*my_flow;
     nw{'Qbar'}(:) = my_flow';
+    if debugflow
+        disp(['debugflow is on'])
+        disp(['SIZE MY_FLOW=',num2str(size(my_flow))]);
+        nw{'Qbar'}(4,:) = my_flow(:,1);
+        nw{'Qbar'}(5,:) = my_flow(:,1);
+    end
+
     disp(['... discharges'])
     if psource_ncfile_ts==1
         %% take care : no transpostion needed !!
@@ -776,8 +747,6 @@ else
             nw{'NO3_src'}(:) = my_no3_src';
             disp(['... NO3 concentration'])
         end
-        
-
     end
     if psource_ncfile_ts == 1
         disp([' ==>'])
@@ -829,9 +798,9 @@ else
             T=20;
             S=15;
         end
-        %% listing...
-        disp(['                        ',num2str(I2(k)),'  ',num2str(J2(k)),...
-                  '  ',num2str(dir(k,1)),'  ',num2str(dir(k,2)),'   30*T   ',...
+        %Print the listing
+        disp(['                        ',num2str(I2for_out(k)),'  ',num2str(J2for_out(k)),...
+                  '  ',num2str(dir(k,1)),'  ',num2str(dir(k,2)),'   T  T   ',...
                   num2str(T),' ',num2str(S)])
     end
     disp(['-----------------------------------------------------------------'])

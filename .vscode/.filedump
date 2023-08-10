@@ -1,0 +1,6 @@
+
+		begin
+      f = addfile("/ceaza/lucas/CROCO-CEAZAMAR/DATA/ERA5/2020-12-10.nc","r")
+      print(f)
+		end
+    

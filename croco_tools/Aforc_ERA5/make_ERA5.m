@@ -33,9 +33,9 @@ close all
 %
 % Common parameters
 %
-crocotools_param                      
-blk_prefix=[blk_prefix,'_'];
-frc_prefix=[frc_prefix,'_'];
+crocotools_param        
+frc_prefix=[frc_prefix,'_ERA5_'];
+blk_prefix=[blk_prefix,'_ERA5_'];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % end of user input  parameters
@@ -74,11 +74,35 @@ lon1=nc{'lon'}(:);
 lat1=nc{'lat'}(:);
 [lon1,lat1]=meshgrid(lon1,lat1);
 
-mask=squeeze(nc{'LSM'}(1,:,:));
-mask(mask ~=0 ) = 1; %we take the first record
+mask=squeeze(nc{'LSM'}(1,:,:)); %we take the first record
+mask(mask ~=0 ) = 1;
 mask = 1-mask ;
 mask(mask ==0 ) = NaN ;
 close(nc);
+
+
+if add_waves == 1
+    %
+    % get horizontal grid for ocean waves
+    % for ERA5 wave variables, resolution change to 0.5° instead of 0.25° 
+    % for the atmo variable (0.25° x 0.25° (atmosphere)  vs  0.5° x 0.5° (ocean waves))
+    %
+    filein=[ERA5_dir,'SWH_Y',num2str(Ymin),'M',num2str(Mmin),'.nc'];
+    nc=netcdf(filein);
+    lonwave=nc{'lon'}(:);
+    latwave=nc{'lat'}(:);
+    [lon1wave,lat1wave]=meshgrid(lonwave,latwave);
+    maskwave=squeeze(nc{'SWH'}(1,:,:));
+    missvalue_wave = ncreadatt(filein,'SWH','missing_value');
+    maskwave(maskwave ~= missvalue_wave ) = 1;
+    maskwave(maskwave == missvalue_wave ) = NaN ;
+    close(nc);
+else
+    lon1wave = NaN;
+    lat1wave = NaN;
+    maskwave = NaN;
+end
+
 
 %
 %Loop on the years and the months
@@ -107,10 +131,10 @@ for Y=Ymin:Ymax
         disp(' ')
         %-------------------------------------------------------------------%
         %
-        % Process time (here in days), with LSM file (common for frc/blk)
+        % Process time (here in days), with SST file (minimum time step)
         %
         %-------------------------------------------------------------------%
-        nc=netcdf([ERA5_dir,'Q_Y',num2str(Y),'M',num2str(M),'.nc']);
+        nc=netcdf([ERA5_dir,'T2M_Y',num2str(Y),'M',num2str(M),'.nc']);
         ERA5_time=nc{'time'}(:);
         close(nc);
         dt=mean(gradient(ERA5_time));
@@ -142,47 +166,58 @@ for Y=Ymin:Ymax
         %
         % ------------------------------------------------------------------%
         %
+	disp(['====================='])
+        disp('Create the frc/blk netcdf file')
         disp(['====================='])
-        disp('Create the blk/frc netcdf file')
-        disp(['====================='])
-        %
         blkname=[blk_prefix,'Y',num2str(Y),...
-                 'M',num2str(sprintf(Mth_format,M)),nc_suffix];       
+                 'M',num2str(sprintf(Mth_format,M)),nc_suffix];
         frcname=[frc_prefix,'Y',num2str(Y),...
                  'M',num2str(sprintf(Mth_format,M)),nc_suffix];
-        if makeblk==1 
-            disp(['Create a new bulk file: ' blkname])
-            create_bulk(blkname,grdname,CROCO_title,time,0);
-            disp([' '])
+        if makeblk==1
+          disp(['Create a new bulk file: ' blkname])
+          create_bulk(blkname,grdname,CROCO_title,time,0);
+          nc_add_globatt(blkname,Yorig,Mmin,Dmin,Hmin,Min_min,Smin,'ERA5');
+          disp([' '])
         end
         if makefrc==1
-            disp(['Create a new forcing file: ' frcname])
-            create_forcing(frcname,grdname,CROCO_title,...
-                           time,time,time,...
-                           time,time,time,...
-                           0,0,0,0,0,0);
-            disp([' '])
+          disp(['Create a new forcing file: ' frcname])
+          disp([' '])
+          create_forcing(frcname,grdname,CROCO_title,...
+                          time,0,0,...
+                          0,0,0,...
+                          0,0,0,0,0,0)
         end
         % %
-        % % Add the tides (needs to be tested for this version of make_ERA5)
+        % % Add the waves
         % %
-        if add_tides==1
-            add_tidal_data(tidename,grdname,frcname,Ntides,tidalrank,...
-                           Yorig,Y,M,coastfileplot);
+	  if makefrc==1 && add_waves==1
+            disp(['Add waves data'])
+            disp(['=============='])
+          end
+	% % 
+        % %
+        % % Add the tides
+        % %
+        if makefrc==1 && add_tides==1
+             add_tidal_data(tidename,grdname,frcname,Ntides,tidalrank,...
+                            Yorig,Y,M,coastfileplot)
         end
+        %
         %
         % Open the CROCO forcing files
         if makefrc==1
-            nc_frc=netcdf(frcname,'write');
+          nc_frc=netcdf(frcname,'write');
         else
-            nc_frc=[];
+          nc_frc=[];
         end
+
+	% Open the CROCO bulk files
         if makeblk==1
-            nc_blk=netcdf(blkname,'write');
+	  nc_blk=netcdf(blkname,'write');
         else
-            nc_blk=[];
+          nc_blk=[];
         end
-        %
+	%
         % Check if there are ERA5 files for the previous Month
         Mm=M-1;
         Ym=Y;
@@ -207,24 +242,18 @@ for Y=Ymin:Ymax
         else
             nc=netcdf(fname);
             tndx=length(nc('time'));
-            %
             if makefrc==1
-                for aa=1:itolap
-                    nc_frc{'sms_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'shf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'swf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'sst_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'sss_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'srf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'wwv_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                end
+               for aa=1:itolap
+                 nc_frc{'sms_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
+               end
             end
-            if makeblk==1
-                for aa=1:itolap
-                    nc_blk{'bulk_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                end
-                close(nc)
-            end
+            %
+	    if makeblk==1
+               for aa=1:itolap
+                 nc_blk{'bulk_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
+               end
+	    end
+            close(nc)
         end
         %
         % Perform interpolations for the previous month or repeat the first one
@@ -235,8 +264,8 @@ for Y=Ymin:Ymax
             else
                 aa0=tndx-(itolap-aa);
             end
-            interp_ERA5(ERA5_dir,Ym,Mm,Roa,interp_method,lon1,lat1,...
-                        mask,aa0,nc_frc,nc_blk,lon,lat,angle,aa)
+            interp_ERA5(ERA5_dir,Ym,Mm,Roa,interp_method,lon1,lat1,lon1wave,lat1wave, ...
+                        mask,maskwave,aa0,nc_frc,nc_blk,lon,lat,angle,aa,add_waves)
         end  
         %######################################################################      
         %   
@@ -253,8 +282,8 @@ for Y=Ymin:Ymax
             if mod(tndx,6)==0
                 disp(['Step: ',num2str(tndx),' of ',num2str(tlen0)])
             end
-            interp_ERA5(ERA5_dir,Y,M,Roa,interp_method,lon1,lat1,...
-                        mask,tndx,nc_frc,nc_blk,lon,lat,angle,tndx+itolap)	
+            interp_ERA5(ERA5_dir,Y,M,Roa,interp_method,lon1,lat1,lon1wave,lat1wave,...
+                        mask,maskwave,tndx,nc_frc,nc_blk,lon,lat,angle,tndx+itolap,add_waves)	
         end
         
         disp(' ')      
@@ -281,25 +310,21 @@ for Y=Ymin:Ymax
             Yp=Y;
         else
             nc=netcdf(fname);
-            tndx=length(nc('time'));
-            %
+
             if makefrc==1
-                for aa=1:itolap
-                    nc_frc{'sms_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'shf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'swf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'sst_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'sss_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'srf_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                    nc_frc{'wwv_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                end
+              disp('sms_time')
+              for tndx=tlen0+itolap+1:tlen;
+                nc_frc{'sms_time'}(tndx)=nc{'time'}(tndx-tlen0-(itolap));
+              end;
             end
-            if makeblk==1
-                for aa=1:itolap
-                    nc_blk{'bulk_time'}(aa)=nc{'time'}(tndx-(itolap-aa));
-                end
-                close(nc)
-            end
+
+	    if makeblk==1
+              disp('bulk_time')
+              for tndx=tlen0+itolap+1:tlen;
+                nc_blk{'bulk_time'}(tndx)=nc{'time'}(tndx-tlen0-(itolap));
+              end
+	    end
+            close(nc)
         end
         %
         % Perform the interpolations for the next month
@@ -317,17 +342,17 @@ for Y=Ymin:Ymax
                 tin=tndx-tlen0-itolap;
                 disp(['tin=',num2str(tin)])
             end
-            interp_ERA5(ERA5_dir,Yp,Mp,Roa,interp_method,lon1,lat1,...
-                        mask,tin,nc_frc,nc_blk,lon,lat,angle,tout)           
+            interp_ERA5(ERA5_dir,Yp,Mp,Roa,interp_method,lon1,lat1,lon1wave,lat1wave,...
+                        mask,maskwave,tin,nc_frc,nc_blk,lon,lat,angle,tout,add_waves)           
         end;
         %
         % Close the CROCO forcing files
         %
         if ~isempty(nc_frc)
-            close(nc_frc);
-          end
+           close(nc_frc);
+        end
         if ~isempty(nc_blk)
-            close(nc_blk);
+           close(nc_blk);
         end
     end
 end
@@ -336,8 +361,8 @@ end
 % just copy the files for the first year and change the time
 %
 disp('======================================================')
-disp('Add spin up phase')      
 if SPIN_Long>0
+disp('Add spin up phase')
     M=Mmin-1;
     Y=Ymin-SPIN_Long;
     for month=1:12*SPIN_Long
@@ -346,58 +371,27 @@ if SPIN_Long>0
             M=1; 
             Y=Y+1;
         end
-    %
-    % Forcing files
-    %
-        if makefrc==1
-            %
-            % Copy the file
-            %
-            frcname=[frc_prefix,'Y',num2str(Ymin),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
-            frcname2=[frc_prefix,'Y',num2str(Y),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
-            disp(['Create ',frcname2]) 
-            eval(['!cp ',frcname,' ',frcname2]) 
-            %
-            % Change the time
-            %
-            nc=netcdf(frcname2,'write');
-            time=nc{'sms_time'}(:)-365.*(Ymin-Y);%+datenum(Yorig,1,1);
-            %[y,m,d,h,mi,s]=datevec(time);
-            %dy=Ymin-Y;
-            %y=y-dy;
-            %time=datenum(y,m,d,h,mi,s)-datenum(Yorig,1,1);
-            nc{'sms_time'}(:)=time;
-            nc{'shf_time'}(:)=time;
-            nc{'swf_time'}(:)=time;
-            nc{'sst_time'}(:)=time;
-            nc{'sss_time'}(:)=time;
-            nc{'srf_time'}(:)=time;
-            nc{'wwv_time'}(:)=time;
-            close(nc)
-        end
         %
         % Bulk files
         %
-        if makeblk==1
-            %
-            % Copy the file
-            %
-            blkname=[blk_prefix,'Y',num2str(Ymin),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
-            blkname2=[blk_prefix,'Y',num2str(Y),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
-            disp(['Create ',blkname2]) 
-            eval(['!cp ',blkname,' ',blkname2]) 
-            %
-            % Change the time
-            %
-            nc=netcdf(blkname2,'write');
-            time=nc{'bulk_time'}(:)-365.*(Ymin-Y);%+datenum(Yorig,1,1);
-            %[y,m,d,h,mi,s]=datevec(time);
-            %dy=Ymin-Y;
-            %y=y-dy;
-            %time=datenum(y,m,d,h,mi,s)-datenum(Yorig,1,1);
-            nc{'bulk_time'}(:)=time;
-            close(nc)
-        end
+        %
+        % Copy the file
+        %
+        blkname=[blk_prefix,'Y',num2str(Ymin),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
+        blkname2=[blk_prefix,'Y',num2str(Y),'M',num2str(sprintf(Mth_format,M)),nc_suffix];
+        disp(['Create ',blkname2]) 
+        eval(['!cp ',blkname,' ',blkname2]) 
+        %
+        % Change the time
+        %
+        nc=netcdf(blkname2,'write');
+        time=nc{'bulk_time'}(:)-365.*(Ymin-Y);%+datenum(Yorig,1,1);
+                                              %[y,m,d,h,mi,s]=datevec(time);
+                                              %dy=Ymin-Y;
+                                              %y=y-dy;
+                                              %time=datenum(y,m,d,h,mi,s)-datenum(Yorig,1,1);
+        nc{'bulk_time'}(:)=time;
+        close(nc)
     end
 end
 %---------------------------------------------------------------
@@ -409,28 +403,20 @@ if makeplot==1
     disp(' Make a few plots...')
     slides=[1 12 24 36];
     
-    if makeblk
-        test_forcing(blkname,grdname,'tair',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'rhum',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'prate',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'uwnd',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'vwnd',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'wspd',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'radlw',slides,3,coastfileplot)
-        figure
-        test_forcing(blkname,grdname,'radsw',slides,3,coastfileplot)
-    end
-    if makefrc
-        figure
-        test_forcing(frcname,grdname,'sustr',slides,3,coastfileplot)
-        figure
-        test_forcing(frcname,grdname,'svstr',slides,3,coastfileplot)  
-    end
+    test_forcing(blkname,grdname,'tair',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'rhum',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'prate',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'uwnd',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'vwnd',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'wspd',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'radlw',slides,3,coastfileplot)
+    figure
+    test_forcing(blkname,grdname,'radsw',slides,3,coastfileplot)
 end
 

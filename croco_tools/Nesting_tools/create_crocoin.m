@@ -73,40 +73,63 @@ while 1==1
       fprintf(fid2,'%s\n',tline);
   end
   
+%   %%  this time stepping section DO NOT WORk PROPERLY
+%   
+%   if strcmp(myline(1:14),'time_stepping:');
+%     tline=fgetl(fid1);
+% %    A=sscanf(tline,'%f'); % %f if float %s string
+%     A=textscan(tline,'%f %s %s %f')
+%     if isempty(A{1})
+%        disp('Warning: Fist argument is not an integer...')
+%        A=textscan(tline,'%s %s %s %f');
+%        ntimes=A{1}{1};
+%     else
+%        disp('In here')
+%        ntimes=A{1}
+%        disp('nocrash')
+%     end
+%     ntimes=A{1}{1};
+%     dt=A{2}{1};
+%     ndtfast=A{3}{1};
+%     ninfo=A{4};
+% %    if rem(dt,rfac)~=0
+% %      disp('Warning: child time step is not an integer...')
+% %    end
+%     if class(dt)=='char'
+%       disp('Warning: child time step is not an integer...')
+%     else   
+%       dt=dt/rfac;
+%     end
+%     ntimes=1;
+%     fprintf(fid2,'%s\n',['            ',num2str(ntimes),...
+% 		    '        ',num2str(dt),...
+% 		    '        ',num2str(ndtfast),...
+% 		    '        ',num2str(ninfo)]);
+%     
+%   end
+  
   %%
   
   if strcmp(myline(1:14),'time_stepping:');
-    tline=fgetl(fid1);
-%    A=sscanf(tline,'%f'); % %f if float %s string
-    A=textscan(tline,'%f %s %s %f');
-    if isempty(A{1})
-       disp('Warning: Fist argument is not an integer...')
-       A=textscan(tline,'%s %s %s %f');
-       ntimes=A{1}{1};
-    else
-       disp('In here')
-       ntimes=A{1}
-       disp('nocrash')
-    end
-%    ntimes=A{1}{1};
-    dt=A{2}{1};
-    ndtfast=A{3}{1};
-    ninfo=A{4};
-%    if rem(dt,rfac)~=0
-%      disp('Warning: child time step is not an integer...')
-%    end
-    if class(dt)=='char'
-      disp('Warning: child time step is not an integer...')
-    else   
-      dt=dt/rfac;
-    end
-    ntimes=1;
-    fprintf(fid2,'%s\n',['            ',num2str(ntimes),...
-		    '        ',num2str(dt),...
-		    '        ',num2str(ndtfast),...
-		    '        ',num2str(ninfo)]);
-    
+      tline=fgetl(fid1);
+      A=textscan(tline,'%f %f %f %f');
+      ntimes=A{1};
+      dt=A{2};
+      ndtfast=A{3};
+      ninfo=A{4};
+      if rem(dt,rfac)~=0
+          disp('Warning: child time step is not an integer...')
+      else
+          dt=dt/rfac;
+      end
+      ntimes=1;
+      fprintf(fid2,'%s\n',['            ',num2str(ntimes),...
+          '        ',num2str(dt),...
+          '        ',num2str(ndtfast),...
+          '        ',num2str(ninfo)]);
+      
   end
+  
   
   %%
   
@@ -320,7 +343,7 @@ while 1==1
       A=textscan(tline,'%s %f %s %f');
       nwrtdiaM_avg=A{3}{1};
     else
-      nwrtdiaM_avg=A{3}
+      nwrtdiaM_avg=A{3};
       nwrtdiaM_avg=rfac*nwrtdiaM_avg;
     end
     ldefdiaM_avg=A{1}{1};

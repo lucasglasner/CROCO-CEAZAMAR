@@ -3,3 +3,7 @@
 __pycache__
 **/*.log
 *.log
+ANALYSIS
+ANALYSIS/*
+croco_tools_old
+croco_tools_old/*

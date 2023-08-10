@@ -497,8 +497,8 @@ add_tides_fcst = 1;       % 1: add tides
 %
 if strcmp(OGCM,'mercator')
   SCRATCH_dir     = [RUN_dir,'/SCRATCH/'];
-  user     = 'XXX';
-  password = 'XXX';
+  user     = 'lglasner';
+  password = 'kpt6yrnsRvVm';
 
   pathMotu =[CROCOTOOLS_dir,'Forecast_tools/'];
 

@@ -38,7 +38,7 @@ def fill_borders(data, x_name='lon', y_name='lat'):
     data = data.ffill(y_name).bfill(y_name)
     return data
 
-def fix_crocotime(DATA,YORIG):
+def fix_crocotime(DATA,YORIG, timename='time'):
     """
     Grab simulation time and transform to datetime objects based on given YORIG
 
@@ -51,9 +51,9 @@ def fix_crocotime(DATA,YORIG):
     """
     ORIG = pd.to_datetime(YORIG)
     new_time = pd.to_datetime([datetime.timedelta(seconds=t.item())+ORIG
-                               for t in DATA.time])
-    DATA['time'] = new_time
-    return DATA.sortby('time')
+                               for t in DATA[timename]])
+    DATA[timename] = new_time
+    return DATA.sortby(timename)
 
 
 def croco_sellonlatbox(data, lonmin, lonmax, latmin, latmax):

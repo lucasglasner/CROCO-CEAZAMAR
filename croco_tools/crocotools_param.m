@@ -243,6 +243,7 @@ makebry    = 1;   % lateral boundary data
 makenpzd   = 0;   % initial and boundary data for NChlPZD and N2ChlPZD2 models
 makebioebus= 0;   % initial and boundary data for BioEBUS model
 makepisces = 0;   % initial and boundary data for PISCES model
+makequota  = 0;   % initial and boundary data for quota version of PISCES model
 %
 %
 makeoa     = 1;   % oa data (intermediate file)
@@ -377,6 +378,7 @@ QSCAT_blk    = 0;       % 1: a) correct NCEP frc/bulk files with
                         %        u,v,wspd fields from daily QSCAT data
                         %    b) download u,v,wspd in QSCAT frc file
 add_tides    = 0;       % 1: add tides
+add_waves    = 0;       % 1: add waves
 %
 % Overlap parameters 
 %
@@ -398,8 +400,8 @@ QSCAT_clim_file  = [DATADIR,'QuikSCAT_clim/',...              % QSCAT climatolog
 %--------------------------------------------------
 %
 Reformat_ECMWF = 1;
-ECMWF_dir= [FORC_DATA_DIR,'ECMWF_',CROCO_config,'/'];  % ERA-I data dir. [croco format]
-My_ECMWF_dir=[FORC_DATA_DIR,'ERAI/'];                  % ERA-I native data downloaded 
+ECMWF_dir    = [FORC_DATA_DIR,'ECMWF_',CROCO_config,'/'];  % ERA-I data dir. [croco format]
+My_ECMWF_dir = [FORC_DATA_DIR,'ERAI/'];                  % ERA-I native data downloaded 
                                                        % with python script
 itolap_ecmwf = 3;                                      % 3 records for daily  ECMWF
 %
@@ -407,10 +409,11 @@ itolap_ecmwf = 3;                                      % 3 records for daily  EC
 %  Options for make_ERA5 
 %--------------------------------------------------
 %
-ERA5_dir= [FORC_DATA_DIR,'ERA5_native_',CROCO_config,'/'];   % ERA-I data dir. [croco format]
-My_ERA5_dir=[FORC_DATA_DIR,'ERA5/'];                  % ERA-I native data downloaded 
-                                                      % with python script
-itolap_era5 = 1;                                      % 2 records = 2 hours
+ERA5_dir    = [FORC_DATA_DIR,'ERA5_',CROCO_config,'/'];        % ERA5 data dir. [croco format]
+My_ERA5_dir = [FORC_DATA_DIR,'ERA5_native_',CROCO_config,'/']; % ERA5 native data downloaded
+                                                               % with python script
+
+itolap_era5 = 2;                                               % 2 records = 2 hours
 %
 %
 %--------------------------------------------
@@ -427,11 +430,20 @@ ini_prefix  = [CROCO_files_dir,'croco_ini_',OGCM,'_'];    % generic initial file
 OGCM_prefix = [OGCM,'_'];                                 % generic OGCM file name 
 
 if strcmp(OGCM,'mercator')
+    % ========================
     % For GLORYS 12 reanalysis extraction + download using python motuclient
     % ========================
+    raw_mercator_name = 'mercator';
+    kdata='MONTHLY' ; % or DAILY 
     motu_url_reana='http://my.cmems-du.eu/motu-web/Motu';
     service_id_reana='GLOBAL_MULTIYEAR_PHY_001_030-TDS';
-    product_id_reana='cmems_mod_glo_phy_my_0.083_P1D-m';
+    if strcmp(kdata,'DAILY')
+      product_id_reana='cmems_mod_glo_phy_my_0.083_P1D-m';
+    elseif strcmp(kdata,'MONTHLY')
+      product_id_reana='cmems_mod_glo_phy_my_0.083_P1M-m'
+    else
+       disp('Please specify what reanalysis frequency you want (DAILY or MONTHLY)')
+    end
 end
 %
 % Number of OGCM bottom levels to remove 
@@ -486,12 +498,11 @@ add_tides_fcst = 1;       % 1: add tides
 %
 %  MERCATOR case: 
 %  =============
-%  To download data: set login/password (http://marine.copernicus.eu)
+%  To download CMEMS data: set login/password (http://marine.copernicus.eu)
 %  and path to croco's motuclient python package;
 %  or set pathMotu='' (empty) to use your own motuclient
 %
-%  Various sets of data are proposed in the 
-%  Copernicus web site (Mercator, UK Met Office ...)
+%  Various sets of data are proposed in the Copernicus web site 
 %
 if strcmp(OGCM,'mercator')
   user     = 'XXX';
@@ -500,16 +511,21 @@ if strcmp(OGCM,'mercator')
   pathMotu =[CROCOTOOLS_dir,'Forecast_tools/'];
 
   mercator_type=1;   % 1 -->  1/12 deg Mercator forecast
-                     % 2 -->  1/4  deg Met-Office forecast (GloSea5)
+                     % 2 -->  high-resolution regional grids
   if mercator_type==1
       motu_url_fcst='http://nrt.cmems-du.eu/motu-web/Motu';
-      service_id_fcst='GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS';
-      product_id_fcst='global-analysis-forecast-phy-001-024';
-      
+      service_id_fcst='GLOBAL_ANALYSISFORECAST_PHY_001_024-TDS';
+      product_id_fcst={'cmems_mod_glo_phy_anfc_0.083deg_P1D-m', ...
+                       'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m', ...
+                       'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', ... 
+                       'cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m'};
   elseif mercator_type==2
       motu_url_fcst='http://nrt.cmems-du.eu/motu-web/Motu';
-      service_id_fcst='GLOBAL_ANALYSISFORECAST_PHY_CPL_001_015-TDS';
-      product_id_fcst='MetO-GLO-PHY-CPL-dm-TEM'
+      service_id_fcst='MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS';
+      product_id_fcst={'cmems_mod_med_phy-ssh_anfc_4.2km_P1D-m', ...
+                       'cmems_mod_med_phy-cur_anfc_4.2km_P1D-m', ...
+                       'cmems_mod_med_phy-tem_anfc_4.2km_P1D-m', ... 
+                       'cmems_mod_med_phy-sal_anfc_4.2km_P1D-m'};
   end
 end
 %
@@ -522,14 +538,10 @@ end
 DIAG_dir = [CROCOTOOLS_dir,'Diagnostic_tools/'];
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
-
-
-
+%
+% 10 Change default netCDF file format for writing
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+netcdf.setDefaultFormat('FORMAT_NETCDF4');
+%

@@ -42,12 +42,9 @@ close(ncriv)
 maxmaxflow=(max(max(FLOW_clm)));
 maxflow=(max(FLOW_clm)');  % attention transpose
 
-meanflowmax=mean(FLOW_clm(:,1));    % pour amazon
-meanflow=nanmean(FLOW_clm(:,:),1)'; % pour les autres
-
-%size(meanflow)
-%plot(meanflow)
-%size(maxflow)
+meanflowmax=mean(FLOW_clm(:,1));    % for the biggest
+meanflow=nanmean(FLOW_clm(:,:),1)'; % for others
+%
 
 %==========================================================================================================
 %% => by default : all rivers in the domain 
@@ -55,12 +52,18 @@ rivdetectype='DEFAULT';
 my_riv=find(latriv_mou>=minlat & latriv_mou<=maxlat & lonriv_mou >= minlon & lonriv_mou <= maxlon);
 
 %==
-
 % => megatl : rivers in the boxes + max value >= 20%*max val of the flow amazonia peak)
 %rivdetectype='MEGATL';
 %thold=0.1;
 %thold=0.03;
 %my_riv=find(latriv_mou>=minlat & latriv_mou<=maxlat & lonriv_mou >= minlon & lonriv_mou <= maxlon & meanflow >= thold.*meanflowmax);
+
+% % => arvor : rivers in the boxes + max value >= 20%*max val of the flow orinoco peak)
+% rivdetectype='ARVOR';
+% %thold=0.1;
+% thold=0.03;
+% my_riv=find(latriv_mou>=minlat & latriv_mou<=maxlat & lonriv_mou >= minlon & lonriv_mou <= maxlon & meanflow >= thold.*meanflowmax);
+
 %========================================
 %
 disp(['There are ',num2str(length(my_riv)),' rivers in the domain : '])
